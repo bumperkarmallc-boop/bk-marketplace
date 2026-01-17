@@ -1,0 +1,48 @@
+export default function SellPage() {
+  return (
+    <main className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
+      <h1 className="text-4xl font-bold mb-6">
+        Become a Seller 🔥
+      </h1>
+<a
+  href="https://forms.gle/AbCdEf123456"
+
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-block mt-4 px-6 py-3 rounded-lg bg-white text-black font-semibold hover:bg-gray-200 transition"
+>
+  Join the Creator Waitlist
+</a>
+
+      <p className="text-lg text-gray-300 max-w-xl mb-10">
+        Bumper Karma is a creator-first marketplace built for artists, makers,
+        misfits, and brands with attitude. No gatekeepers. No fake polish.
+        You bring the work — you keep the control.
+      </p>
+
+      <div className="bg-gray-900 p-6 rounded-lg border border-white/20 max-w-lg mb-8">
+        <h2 className="text-2xl font-semibold mb-4">
+          Why Sell on Bumper Karma?
+        </h2>
+        <ul className="text-left space-y-3 text-gray-300">
+          <li>• Sell your own designs, products, or digital goods</li>
+          <li>• Set your own prices and keep your brand voice</li>
+          <li>• No algorithm games, no shadow bans</li>
+          <li>• Built for bold, unfiltered creators</li>
+        </ul>
+      </div>
+
+      <div className="bg-black p-6 rounded-lg border border-white/10 max-w-lg">
+        <p className="mb-2 text-lg font-semibold">
+          Creator signup opens soon. No pressure — just real people building real stuff.
+
+        </p>
+        <p className="text-sm text-gray-400">
+          This page is live so links don’t break — dashboards and onboarding are next.
+        </p>
+      </div>
+    </main>
+  );
+}
+nano app/sell/page.tsx
+

@@ -1,3 +1,6 @@
+const CREATOR_FORM_URL = "https://docs.google.com/forms/d/1A0kbJSrv31kgUnTSHoS5ywybVLGa";
+
+
 export default function SellPage() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen px-6">

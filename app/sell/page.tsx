@@ -1,6 +1,3 @@
-const CREATOR_FORM_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSeq-i3LZKGXoNujxFRVo3D9r1FvyBBJdfBz6ISJ-DjYmryw/viewform";
-
 export default function SellPage() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
@@ -9,12 +6,12 @@ export default function SellPage() {
       </h1>
 
       <a
-        className="mt-6"
-        href={CREATOR_FORM_URL}
+        href="https://docs.google.com/forms/d/e/1FAIpQLSeq-i3LzKGXoNujxFRVo3D9r1FvvyBBJdfBzI65l-DjVmryww/viewform"
         target="_blank"
         rel="noopener noreferrer"
+        className="mt-6"
       >
-        <span className="inline-block mt-6 px-6 py-3 rounded-lg bg-white text-black font-semibold hover:bg-gray-200 transition">
+        <span className="inline-block px-6 py-3 rounded-lg bg-white text-black font-semibold hover:bg-gray-200 transition">
           Join the Creator Waitlist
         </span>
       </a>
@@ -25,19 +22,17 @@ export default function SellPage() {
       </p>
 
       <p className="text-gray-400 text-sm mt-4">
-        No gatekeepers. No begging. No bullshit.
-      </p>
-
-      <p className="text-gray-400 text-sm mt-4">
         Built for bold, unapologetic creators who want full control.
       </p>
 
-      <div className="bg-gray-900 p-6 rounded-lg border border-white/20 max-w-lg mt-10">
-        <h2 className="text-2xl font-semibold mb-4">Why Sell on Bumper Karma?</h2>
-        <ul className="text-left space-y-3 text-gray-300">
+      <div className="bg-gray-900 p-6 rounded-lg border border-white/20 max-w-lg mt-10 text-left">
+        <h2 className="text-2xl font-semibold mb-4">
+          Why Sell on Bumper Karma?
+        </h2>
+        <ul className="space-y-2 text-gray-300">
           <li>• Sell your own designs, products, or digital goods</li>
-          <li>• Set your own prices and keep your brand voice</li>
-          <li>• No algorithm games. No shadow bans</li>
+          <li>• Set your own prices and keep your voice</li>
+          <li>• No algorithm games. No shadow bans.</li>
           <li>• Built for bold, unfiltered creators</li>
         </ul>
       </div>

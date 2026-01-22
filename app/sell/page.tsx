@@ -28,6 +28,7 @@ export default function SellPage() {
       <p className="text-gray-400 text-sm mt-4">
         Built for bold, unapologetic creators who want full control.
       </p>
+<p className="text-center text-sm text-gray-500 mt-6">Limited early access. Quality over chaos.</p>
 
       <div className="mt-10 max-w-lg text-left border border-white/20 rounded-lg p-6">
         <h3 className="text-xl font-semibold mb-3">

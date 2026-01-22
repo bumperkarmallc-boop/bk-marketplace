@@ -31,6 +31,10 @@ export default function RootLayout({
 <Nav />
 
         {children}
+<footer className="mt-12 py-6 text-center text-xs text-gray-500">
+  © {new Date().getFullYear()} Bumper Karma. Built loud.
+</footer>
+
       </body>
     </html>
   );

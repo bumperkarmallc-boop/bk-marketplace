@@ -7,6 +7,7 @@ export default function ExplorePage() {
         Browse bold, unapologetic creations from rebels, misfits, outlaws,
         and independent designers chasing their own lanes.
       </p>
+<p className="text-center text-sm text-gray-500 mb-10">More creators dropping soon.</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 

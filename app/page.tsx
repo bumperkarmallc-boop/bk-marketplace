@@ -8,6 +8,7 @@ export default function Home() {
 <p className="text-lg max-w-xl mb-10 opacity-90">
   Bumper Karma is a creator-first marketplace for people who don’t ask permission.
 </p>
+<p className="text-center text-sm text-gray-500 mb-8">More creators. More chaos. Dropping soon.</p>
 
 <div className="flex flex-col gap-4 w-full max-w-md">
   <a

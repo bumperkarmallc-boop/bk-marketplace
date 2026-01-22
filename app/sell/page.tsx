@@ -6,7 +6,7 @@ export default function SellPage() {
       </h1>
 
       <a
-        href="https://docs.google.com/forms/d/e/1FAIpQLSeq-i3LzKGXoNujxFRVo3D9r1FvvyBBJdfBzI65l-DjVmryww/viewform"
+        href="https://docs.google.com/forms/d/e/1FAIpQLSeq-i3LzKGXoNujxFRVo3D9r1FvvyBBJdfBzI65l-DjVmryww/viewform?usp=header"
         target="_blank"
         rel="noopener noreferrer"
         className="mt-6"
@@ -15,6 +15,10 @@ export default function SellPage() {
           Join the Creator Waitlist
         </span>
       </a>
+
+      <p className="mt-3 text-sm text-gray-400">
+        No payment required to start. Build first. Decide later.
+      </p>
 
       <p className="text-lg text-gray-300 max-w-xl mt-10">
         A marketplace built for misfits, makers, and rulebreakers.
@@ -25,16 +29,40 @@ export default function SellPage() {
         Built for bold, unapologetic creators who want full control.
       </p>
 
-      <div className="bg-gray-900 p-6 rounded-lg border border-white/20 max-w-lg mt-10 text-left">
-        <h2 className="text-2xl font-semibold mb-4">
-          Why Sell on Bumper Karma?
-        </h2>
-        <ul className="space-y-2 text-gray-300">
-          <li>• Sell your own designs, products, or digital goods</li>
-          <li>• Set your own prices and keep your voice</li>
-          <li>• No algorithm games. No shadow bans.</li>
-          <li>• Built for bold, unfiltered creators</li>
-        </ul>
+      <div className="mt-10 max-w-lg text-left border border-white/20 rounded-lg p-6">
+        <h3 className="text-xl font-semibold mb-3">
+          7-Day Seller Trial
+        </h3>
+
+        <p className="text-gray-300 mb-2">
+          Sellers get 7 days to build their seller page, upload work,
+          and decide if Bumper Karma is right for them.
+        </p>
+
+        <p className="text-gray-300 mb-2">
+          No payment is required during the trial.
+          Selling is disabled until a plan is activated.
+        </p>
+
+        <p className="text-gray-300 mb-2">
+          If you choose not to continue after 7 days,
+          you can leave with no charges and no obligation.
+        </p>
+
+        <p className="text-gray-300 mb-2">
+          We give you time to build your seller page,
+          upload your work, and see if Bumper Karma fits your chaos.
+        </p>
+
+        <p className="text-gray-300">
+          No upfront fees. No pressure to launch.
+          If you decide it’s not for you, you can walk away without
+          it costing you anything.
+        </p>
+
+        <p className="text-gray-400 text-sm mt-3">
+          Early sellers get access before the marketplace officially opens.
+        </p>
       </div>
     </main>
   );

@@ -1,0 +1,27 @@
+export default function CreatorProductsPage() {
+  return (
+    <main className="min-h-screen p-8">
+      <h1 className="text-2xl font-bold mb-4">Creator Products</h1>
+
+      <p className="mb-6">
+        This page is used by creators to add and manage anything they sell.
+        Physical. Digital. Services. Experiences. No boxes. No limits.
+      </p>
+
+      <h2 className="text-xl font-semibold mb-2">What you can sell</h2>
+      <ul className="list-disc list-inside space-y-1">
+        <li>Physical products (apparel, art, merch, handmade goods)</li>
+        <li>Digital products (downloads, presets, PDFs, music, designs)</li>
+        <li>Services (custom work, consulting, commissions)</li>
+        <li>Experiences (events, access, memberships)</li>
+        <li>Anything else you create and own the rights to</li>
+      </ul>
+
+      <p className="mt-6 text-sm opacity-80">
+        Categories exist for clarity — not control. Creators decide what they sell.
+      </p>
+<p className="mt-4 text-xs text-gray-500">More creator tools coming next.</p>
+
+    </main>
+  );
+}

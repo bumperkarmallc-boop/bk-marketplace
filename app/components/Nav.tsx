@@ -26,7 +26,7 @@ export default function Nav() {
           <a href="/sell">Sell</a>
         </li>
 <li>
-  <a href="/creator/products">Creator</a>
+  <a href="/creator">Creator</a>
 </li>
     
     <li>

@@ -1,7 +1,20 @@
 export default function CreatorProductsPage() {
   return (
     <main className="min-h-screen p-8">
-      <h1 className="text-2xl font-bold mb-4">Creator Products</h1>
+     <div
+  style={{
+    marginBottom: "24px",
+    padding: "12px 16px",
+    border: "1px solid rgba(255,255,255,0.15)",
+    borderRadius: "8px",
+    opacity: 0.85,
+  }}
+>
+  <p style={{ fontSize: "14px", margin: 0 }}>
+Creator access is limited while tools are being finalized for launch.
+  </p>
+</div>
+ <h1 className="text-2xl font-bold mb-4">Creator Products</h1>
 
       <p className="mb-6">
         This page is used by creators to add and manage anything they sell.

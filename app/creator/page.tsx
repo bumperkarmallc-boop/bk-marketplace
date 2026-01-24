@@ -1,6 +1,20 @@
 export default function CreatorPage() {
   return (
     <main className="min-h-screen p-8 text-center">
+<div
+  style={{
+    marginBottom: "24px",
+    padding: "12px 16px",
+    border: "1px solid rgba(255,255,255,0.15)",
+    borderRadius: "8px",
+    opacity: 0.85,
+  }}
+>
+  <p style={{ fontSize: "14px", margin: 0 }}>
+Creator access is limited while tools are being finalized for launch.
+  </p>
+</div>
+
       <h1 className="text-4xl font-bold mb-4">Creator Hub</h1>
 
       <p className="text-lg max-w-xl mx-auto mb-8 opacity-90">
@@ -23,6 +37,7 @@ export default function CreatorPage() {
           View Listings
         </a>
       </div>
+
     </main>
   );
 }

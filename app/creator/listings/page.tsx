@@ -1,7 +1,21 @@
 export default function CreatorListings() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
-      <h1 className="text-4xl font-bold mb-6">
+<div
+  style={{
+    marginBottom: "24px",
+    padding: "12px 16px",
+    border: "1px solid rgba(255,255,255,0.15)",
+    borderRadius: "8px",
+    opacity: 0.85,
+  }}
+>
+  <p style={{ fontSize: "14px", margin: 0 }}>
+    Listing tools are being finalized. You’ll be able to manage listings here soon.
+  </p>
+</div>
+     
+ <h1 className="text-4xl font-bold mb-6">
         Creator Listings
       </h1>
 

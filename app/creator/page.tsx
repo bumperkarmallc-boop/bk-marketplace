@@ -22,6 +22,15 @@ Creator access is limited while tools are being finalized for launch.
         you sell on Bumper Karma.
       </p>
 
+<div className="mt-6 text-sm opacity-80">
+  <p>
+    Creator access is open. Upload what you want — just follow the rules.
+    No minors. No stolen work. No illegal content.
+  </p>
+  <p className="mt-2 opacity-70">
+    Phase 1 is self-serve. Abuse it and you’re gone.
+  </p>
+</div>
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <a
           href="/creator/products"

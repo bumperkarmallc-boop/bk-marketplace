@@ -29,6 +29,7 @@ Creator access is limited while tools are being finalized for launch.
     + Create Product
   </button>
 </div>
+</div>
 
       <p className="mb-6">
         This page is used by creators to add and manage anything they sell.

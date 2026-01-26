@@ -10,10 +10,10 @@ export default function NewProductPage() {
 
       <div className="border border-white/20 rounded-lg p-6 opacity-80">
         <p className="text-sm">
-          Phase 1 status: <strong>View-only placeholder</strong>
-        </p>
-        <p className="text-sm mt-2">
-          This route exists so creators can flow forward without dead ends.
+Phase 1 status: Setup mode
+
+This page will become the product creation flow.
+For now, it confirms routing, permissions, and layout.
         </p>
       </div>
     </main>

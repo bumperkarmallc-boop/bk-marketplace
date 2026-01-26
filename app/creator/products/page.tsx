@@ -1,3 +1,4 @@
+"use client";
 export default function CreatorProductsPage() {
   return (
     <main className="min-h-screen p-8">
@@ -17,17 +18,12 @@ Creator access is limited while tools are being finalized for launch.
  <h1 className="text-2xl font-bold mb-4">Creator Products</h1>
 <div className="mb-6">
 <div className="mb-6">
-  <button
-    type="button"
-    onClick={() =>
-      alert(
-        "Creator tools unlock in phases. You’re early — that’s a flex. Want first access? Get on the list."
-      )
-    }
-    className="inline-block border border-white/30 rounded-lg px-5 py-2 text-sm opacity-80 hover:bg-white/10"
-  >
-    + Create Product
-  </button>
+<a
+  href="/creator/products/new"
+  className="inline-block border border-white/30 rounded-lg px-5 py-2 text-sm opacity-80"
+>
+  + Create Product
+</a>
 </div>
 </div>
 

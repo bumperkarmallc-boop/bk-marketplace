@@ -1,3 +1,4 @@
+// PHASE 1 PLACEHOLDER — form will be added in Phase 2
 export default function NewProductPage() {
   return (
     <main className="min-h-screen p-8">

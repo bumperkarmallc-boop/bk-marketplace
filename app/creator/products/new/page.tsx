@@ -20,3 +20,4 @@ For now, it confirms routing, permissions, and layout.
     </main>
   );
 }
+{/* Phase 1 placeholder confirmed */}

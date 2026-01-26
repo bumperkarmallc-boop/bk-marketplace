@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 export default function CreatorProductsPage() {
   return (
     <main className="min-h-screen p-8">
@@ -19,11 +20,12 @@ Creator access is limited while tools are being finalized for launch.
 <div className="mb-6">
 <div className="mb-6">
 <a
+<Link
   href="/creator/products/new"
   className="inline-block border border-white/30 rounded-lg px-5 py-2 text-sm opacity-80"
 >
-  + Create Product
-</a>
+  Create Product
+</Link>
 </div>
 </div>
 

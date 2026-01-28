@@ -1,10 +1,38 @@
 import { NextResponse } from "next/server";
 
+/**
+ * TEMP in-memory product store (Phase 2)
+ * This will be replaced by a database later
+ */
+type Product = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+};
+
+const products: Product[] = [];
+
+/**
+ * GET /api/products
+ * Returns all products
+ */
+export async function GET() {
+  return NextResponse.json({
+    success: true,
+    products,
+  });
+}
+
+/**
+ * POST /api/products
+ * Creates a new product
+ */
 export async function POST(req: Request) {
   try {
     const { title, description, price } = await req.json();
 
-    // Basic validation
+    // Validation
     if (!title || !description || price === undefined) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -19,16 +47,20 @@ export async function POST(req: Request) {
       );
     }
 
-    // TEMP response (no DB yet)
+    const newProduct: Product = {
+      id: crypto.randomUUID(),
+      title,
+      description,
+      price,
+    };
+
+    products.push(newProduct);
+
     return NextResponse.json({
       success: true,
-      product: {
-        title,
-        description,
-        price,
-      },
+      product: newProduct,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Invalid JSON payload" },
       { status: 400 }

@@ -1,24 +1,57 @@
-// PHASE 1 PLACEHOLDER — form will be added in Phase 2
-export default function NewProductPage() {
+export default function CreateProductPage() {
   return (
-    <main className="min-h-screen p-8">
-      <h1 className="text-3xl font-bold mb-4">Create Product</h1>
-<hr className="border-white/10 mb-6" />
-
-      <p className="opacity-80 max-w-xl mb-6">
-        Product creation tools are coming online in phases.
-        You’re early — that’s a flex.
+    <div className="max-w-3xl mx-auto px-6 py-10">
+      <h1 className="text-3xl font-bold mb-2">Create Product</h1>
+      <p className="text-sm text-muted-foreground mb-8">
+        Phase 1 — Product details setup. Uploads and pricing come next.
       </p>
 
-      <div className="border border-white/20 rounded-lg p-6 opacity-80">
-        <p className="text-sm">
-Phase 1 status: Setup mode
+      <form className="space-y-6">
+        {/* Product Title */}
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Product Title
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. Chaos Angel Tee"
+            className="w-full rounded-md border px-3 py-2 bg-background"
+          />
+        </div>
 
-This page will become the product creation flow.
-For now, it confirms routing, permissions, and layout.
-        </p>
-      </div>
-    </main>
+        {/* Description */}
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Description
+          </label>
+          <textarea
+            placeholder="Describe the product..."
+            rows={4}
+            className="w-full rounded-md border px-3 py-2 bg-background"
+          />
+        </div>
+
+        {/* Image Upload (placeholder) */}
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Product Images
+          </label>
+          <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+            Image upload coming next phase
+          </div>
+        </div>
+
+        {/* Submit */}
+        <div className="pt-4">
+          <button
+            type="button"
+            disabled
+            className="rounded-md px-4 py-2 bg-muted text-muted-foreground cursor-not-allowed"
+          >
+            Save Product (coming soon)
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
-{/* Phase 1 placeholder confirmed */}

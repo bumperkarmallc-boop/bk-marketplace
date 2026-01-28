@@ -68,8 +68,27 @@ const [price, setPrice] = useState("");
 <button
   type="button"
   onClick={() => {
-    console.log("Save Product clicked");
-  }}
+fetch("/api/products", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    title,
+    description,
+    price,
+  }),
+})
+  .then((res) => res.json())
+  .then((data) => {
+    console.log("Saved product:", data);
+  })
+  .catch((err) => {
+    console.error("Save failed:", err);
+  });
+
+}}
+
   className="rounded-md px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
 >
   Save Product

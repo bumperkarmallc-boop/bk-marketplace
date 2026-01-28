@@ -1,18 +1,23 @@
-export type ProductStatus = "draft" | "active" | "archived";
+export type ProductImage = {
+  id: string
+  url: string
+  alt?: string
+}
 
 export type Product = {
-  id: string;
-  creatorId: string;
+  id: string
+  creatorId: string
 
-  title: string;
-  description: string;
+  title: string
+  description: string
 
-  price: number;
+  price: number
+  currency: 'USD'
 
-  images: string[]; // supports multiple images now & later
+  images: ProductImage[]   // supports multi-image from day one
 
-  status: ProductStatus;
+  status: 'draft' | 'active' | 'archived'
 
-  createdAt: Date;
-  updatedAt: Date;
-};
+  createdAt: Date
+  updatedAt: Date
+}

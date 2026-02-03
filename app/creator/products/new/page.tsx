@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CreateProductPage() {
@@ -11,7 +11,15 @@ export default function CreateProductPage() {
   const [price, setPrice] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-const [success, setSuccess] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  // Auto-hide success banner after 3 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,8 +45,11 @@ const [success, setSuccess] = useState<string | null>(null);
         throw new Error(data?.error || "Failed to save product");
       }
 
-      // Redirect to list page after successful save
-setSuccess("Product submitted successfully.");
+      // Success feedback + clear form
+      setSuccess("Product submitted successfully.");
+      setTitle("");
+      setDescription("");
+      setPrice("");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -52,75 +63,62 @@ setSuccess("Product submitted successfully.");
       <p className="text-sm text-muted-foreground mb-6">
         Add a new product to your creator catalog.
       </p>
-{success && (
-  <div className="mb-6 rounded-md bg-green-600 px-4 py-3 text-white font-semibold">
-    {success}
-  </div>
-)}
+
+      {success && (
+        <div className="mb-6 rounded-md bg-green-600 px-4 py-3 text-white font-semibold">
+          {success}
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-6 rounded-md bg-red-600 px-4 py-3 text-white font-semibold">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Product Title
-          </label>
+          <label className="block text-sm font-medium mb-1">Product Title</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="w-full rounded-md border px-3 py-2 bg-background"
+            disabled={loading}
             placeholder="e.g. Chaos Angel Tee"
+            className="w-full rounded-md border px-3 py-2 bg-background"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Description
-          </label>
+          <label className="block text-sm font-medium mb-1">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
-            rows={4}
+            disabled={loading}
+            placeholder="Describe the product..."
             className="w-full rounded-md border px-3 py-2 bg-background"
-            placeholder="Describe the product…"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Price (USD)
-          </label>
+          <label className="block text-sm font-medium mb-1">Price (USD)</label>
           <input
             type="number"
             step="0.01"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             required
-            className="w-full rounded-md border px-3 py-2 bg-background"
+            disabled={loading}
             placeholder="19.99"
+            className="w-full rounded-md border px-3 py-2 bg-background"
           />
         </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-{success && (
-  <p className="text-sm text-green-500">
-    {success}
-  </p>
-)}
 
         <button
           type="submit"
           disabled={loading}
           className="w-full rounded-md bg-white text-black py-2 font-semibold disabled:opacity-50"
         >
-          {loading ? "Saving…" : "Save Product"}
-        </button>
-      </form>
-    </div>
-  );
-}
+          {loading ? "Saving..." : "

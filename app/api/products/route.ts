@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 
-const products = [
-  {
-    id: "test-1",
-    title: "test tee",
-    description: "test",
-    price: 19.99,
-  },
-];
-
 export async function GET() {
-  return NextResponse.json({ products });
+  try {
+    return NextResponse.json({
+      success: true,
+      products: [],
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: "Failed to load products" },
+      { status: 500 }
+    );
+  }
 }

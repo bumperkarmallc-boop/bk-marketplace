@@ -52,6 +52,11 @@ setSuccess("Product submitted successfully.");
       <p className="text-sm text-muted-foreground mb-6">
         Add a new product to your creator catalog.
       </p>
+{success && (
+  <div className="mb-6 rounded-md bg-green-600 px-4 py-3 text-white font-semibold">
+    {success}
+  </div>
+)}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>

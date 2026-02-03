@@ -1,18 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CreateProductPage() {
+  const router = useRouter();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+const [success, setSuccess] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    setLoading(true);
 
     try {
       const res = await fetch("/api/products", {
@@ -33,14 +37,9 @@ export default function CreateProductPage() {
         throw new Error(data?.error || "Failed to save product");
       }
 
-      console.log("Saved product:", data);
-
-      // reset form after success
-      setTitle("");
-      setDescription("");
-      setPrice("");
+      // Redirect to list page after successful save
+setSuccess("Product submitted successfully.");
     } catch (err: any) {
-      console.error(err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -48,14 +47,13 @@ export default function CreateProductPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold mb-2">Create Product</h1>
-      <p className="text-sm text-muted-foreground mb-8">
-        Phase 1 — Product details setup. Uploads and pricing come next.
+    <div className="max-w-xl mx-auto px-6 py-10">
+      <h1 className="text-2xl font-bold mb-2">Create Product</h1>
+      <p className="text-sm text-muted-foreground mb-6">
+        Add a new product to your creator catalog.
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title */}
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-sm font-medium mb-1">
             Product Title
@@ -64,13 +62,12 @@ export default function CreateProductPage() {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Chaos Angel Tee"
             required
             className="w-full rounded-md border px-3 py-2 bg-background"
+            placeholder="e.g. Chaos Angel Tee"
           />
         </div>
 
-        {/* Description */}
         <div>
           <label className="block text-sm font-medium mb-1">
             Description
@@ -78,13 +75,13 @@ export default function CreateProductPage() {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe the product..."
             required
+            rows={4}
             className="w-full rounded-md border px-3 py-2 bg-background"
+            placeholder="Describe the product…"
           />
         </div>
 
-        {/* Price */}
         <div>
           <label className="block text-sm font-medium mb-1">
             Price (USD)
@@ -96,6 +93,7 @@ export default function CreateProductPage() {
             onChange={(e) => setPrice(e.target.value)}
             required
             className="w-full rounded-md border px-3 py-2 bg-background"
+            placeholder="19.99"
           />
         </div>
 
@@ -104,19 +102,20 @@ export default function CreateProductPage() {
             {error}
           </p>
         )}
+{success && (
+  <p className="text-sm text-green-500">
+    {success}
+  </p>
+)}
 
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-white text-black px-4 py-2 font-medium disabled:opacity-50"
+          className="w-full rounded-md bg-white text-black py-2 font-semibold disabled:opacity-50"
         >
-          {loading ? "Saving..." : "Save Product"}
+          {loading ? "Saving…" : "Save Product"}
         </button>
       </form>
-
-      <p className="mt-10 text-xs text-muted-foreground">
-        © 2026 Bumper Karma. Built loud.
-      </p>
     </div>
   );
 }

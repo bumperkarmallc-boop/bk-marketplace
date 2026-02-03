@@ -78,40 +78,41 @@ export default function CreateProductPage() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium mb-1">Product Title</label>
+          <label className="block text-sm font-medium mb-1">
+            Product Title
+          </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            disabled={loading}
-            placeholder="e.g. Chaos Angel Tee"
             className="w-full rounded-md border px-3 py-2 bg-background"
+            placeholder="e.g. Chaos Angel Tee"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
+          <label className="block text-sm font-medium mb-1">
+            Description
+          </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
-            disabled={loading}
-            placeholder="Describe the product..."
             className="w-full rounded-md border px-3 py-2 bg-background"
+            placeholder="Describe the product..."
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Price (USD)</label>
+          <label className="block text-sm font-medium mb-1">
+            Price (USD)
+          </label>
           <input
             type="number"
-            step="0.01"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
+            step="0.01"
             required
-            disabled={loading}
-            placeholder="19.99"
             className="w-full rounded-md border px-3 py-2 bg-background"
           />
         </div>
@@ -121,4 +122,9 @@ export default function CreateProductPage() {
           disabled={loading}
           className="w-full rounded-md bg-white text-black py-2 font-semibold disabled:opacity-50"
         >
-          {loading ? "Saving..." : "
+          {loading ? "Saving..." : "Save Product"}
+        </button>
+      </form>
+    </div>
+  );
+}

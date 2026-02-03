@@ -1,15 +1,24 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  return NextResponse.json({
+    success: true,
+    products: [],
+  });
+}
+
+export async function POST(req: Request) {
   try {
+    const body = await req.json();
+
     return NextResponse.json({
       success: true,
-      products: [],
+      product: body,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
-      { success: false, error: "Failed to load products" },
-      { status: 500 }
+      { success: false, error: "Invalid request body" },
+      { status: 400 }
     );
   }
 }

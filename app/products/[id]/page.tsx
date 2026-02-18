@@ -1,51 +1,39 @@
-type Product = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-};
-
-async function getProduct(id: string): Promise<Product | null> {
-  const res = await fetch(`http://localhost:3000/api/products/${id}`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) return null;
-
-  const data = await res.json();
-  return data.product ?? null;
-}
+import { notFound } from "next/navigation";
+import { supabase } from "../../../lib/supabase";
 
 export default async function ProductPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const product = await getProduct(params.id);
+  const { id } = await params;
+  const { data: product, error } = await supabase
+    .from("products")
+    .select("*")
+.eq("id", id)
+    .single();
 
-  if (!product) {
-    return (
-      <div className="max-w-xl mx-auto px-6 py-10">
-        <p className="text-muted-foreground">Product not found.</p>
-      </div>
-    );
-  }
+if (error) {
+  console.log("SUPABASE ERROR:", error);
+  return notFound();
+}
+
+if (!product) {
+  console.log("NO PRODUCT FOUND");
+  return notFound();
+}
 
   return (
-    <div className="max-w-xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
+    <div style={{ padding: "2rem", maxWidth: "800px" }}>
+      <h1>{product.title}</h1>
 
-      <p className="text-muted-foreground mb-6">
-        {product.description}
-      </p>
-
-      <p className="text-xl font-bold mb-8">
+      <p style={{ fontSize: "1.2rem", marginTop: "1rem" }}>
         ${product.price.toFixed(2)}
       </p>
 
-      <button className="px-6 py-3 bg-black text-white rounded">
-        Buy Now
-      </button>
+      <p style={{ marginTop: "1.5rem", opacity: 0.8 }}>
+        {product.description}
+      </p>
     </div>
   );
 }

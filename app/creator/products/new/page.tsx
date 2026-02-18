@@ -1,84 +1,72 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
-export default function CreateProductPage() {
+export default function NewProductPage() {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-
-  // Auto-hide success banner after 3 seconds
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
 
-    try {
-      const res = await fetch("/api/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: title.trim(),
-          description: description.trim(),
-          price: Number(price),
-        }),
-      });
+    // Get current user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.error || "Failed to save product");
-      }
-
-      // Success feedback + clear form
-      setSuccess("Product submitted successfully.");
-      setTitle("");
-      setDescription("");
-      setPrice("");
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (userError || !user) {
+      console.error("No authenticated user");
+      return;
     }
+console.log("User ID:", user.id);
+
+    const { data, error } = await supabase
+      .from("products")
+      .insert([
+        {
+          title,
+          description,
+          price: Number(price),
+          user_id: user.id,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    router.push(`/products/${data.id}`);
   }
 
   return (
-    <div className="max-w-xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-2">Create Product</h1>
-      <p className="text-sm text-muted-foreground mb-6">
-        Add a new product to your creator catalog.
+    <div
+      style={{
+        padding: "2rem",
+        maxWidth: "720px",
+        margin: "0 auto",
+      }}
+    >
+      <h1 style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>
+        Add a Product
+      </h1>
+
+      <p style={{ opacity: 0.85, marginBottom: "2rem" }}>
+        This creates a live listing. If it’s here, buyers can see it.
       </p>
 
-      {success && (
-        <div className="mb-6 rounded-md bg-green-600 px-4 py-3 text-white font-semibold">
-          {success}
-        </div>
-      )}
-
-      {error && (
-        <div className="mb-6 rounded-md bg-red-600 px-4 py-3 text-white font-semibold">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label className="block text-sm font-medium mb-1">
+      <form onSubmit={handleSubmit}>
+        {/* TITLE */}
+        <div style={{ marginBottom: "1.75rem" }}>
+          <label style={{ display: "block", marginBottom: "0.5rem" }}>
             Product Title
           </label>
           <input
@@ -86,43 +74,77 @@ export default function CreateProductPage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="w-full rounded-md border px-3 py-2 bg-background"
-            placeholder="e.g. Chaos Angel Tee"
+            style={{
+              width: "100%",
+              padding: "0.75rem",
+              border: "2px solid #444",
+              borderRadius: "8px",
+              background: "#111",
+              color: "#fff",
+              fontSize: "1rem",
+            }}
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">
+        {/* DESCRIPTION */}
+        <div style={{ marginBottom: "1.75rem" }}>
+          <label style={{ display: "block", marginBottom: "0.5rem" }}>
             Description
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-md border px-3 py-2 bg-background"
-            placeholder="Describe the product..."
+            required
+            rows={5}
+            style={{
+              width: "100%",
+              padding: "0.75rem",
+              border: "2px solid #444",
+              borderRadius: "8px",
+              background: "#111",
+              color: "#fff",
+              fontSize: "1rem",
+            }}
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">
+        {/* PRICE */}
+        <div style={{ marginBottom: "2rem" }}>
+          <label style={{ display: "block", marginBottom: "0.5rem" }}>
             Price (USD)
           </label>
           <input
             type="number"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            step="0.01"
             required
-            className="w-full rounded-md border px-3 py-2 bg-background"
+            min="0"
+            step="0.01"
+            style={{
+              width: "100%",
+              padding: "0.75rem",
+              border: "2px solid #444",
+              borderRadius: "8px",
+              background: "#111",
+              color: "#fff",
+              fontSize: "1rem",
+            }}
           />
         </div>
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-white text-black py-2 font-semibold disabled:opacity-50"
+          style={{
+            padding: "0.9rem 1.5rem",
+            border: "none",
+            borderRadius: "8px",
+            background: "#fff",
+            color: "#000",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
         >
-          {loading ? "Saving..." : "Save Product"}
+          Publish Product
         </button>
       </form>
     </div>

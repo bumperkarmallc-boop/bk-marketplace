@@ -1,38 +1,35 @@
+import Link from "next/link";
+
 export default function Nav() {
   return (
     <nav
       style={{
-        padding: "12px 24px",
-        fontSize: "14px",
-        opacity: 0.7,
+        padding: "1rem 2rem",
+        borderBottom: "1px solid #333",
+        display: "flex",
+        gap: "1.5rem",
+        alignItems: "center",
       }}
     >
-      <ul
-        style={{
-          display: "flex",
-          gap: "16px",
-          listStyle: "none",
-          margin: 0,
-          padding: 0,
-        }}
-      >
-        <li>
-          <a href="/">Home</a>
-        </li>
-        <li>
-          <a href="/explore">Explore</a>
-        </li>
-        <li>
-          <a href="/sell">Sell</a>
-        </li>
-<li>
-  <a href="/creator">Creator</a>
-</li>
-    
-    <li>
-          <a href="/how-it-works">How It Works</a>
-        </li>
-      </ul>
+      <Link href="/" style={{ fontWeight: "bold" }}>
+        Bumper Karma
+      </Link>
+
+      <Link href="/explore">
+        Explore
+      </Link>
+
+      <Link href="/sell">
+        Sell
+      </Link>
+
+      <Link href="/creator/products">
+        Creator
+      </Link>
+
+      <Link href="/how-it-works">
+        How It Works
+      </Link>
     </nav>
   );
 }

@@ -1,121 +1,76 @@
-"use client";
+export const dynamic = "force-dynamic"
 
-import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase"
+import Link from "next/link"
+import { revalidatePath } from "next/cache"
 
-type Product = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-};
+export default async function CreatorProductsPage() {
+  async function deleteProduct(formData: FormData) {
+    "use server"
 
-export default function CreatorProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+    const id = formData.get("id") as string
 
-  // Create form state
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
+await supabase
+  .from("products")
+  .delete()
+  .eq("id", id)
+  .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
 
-  // Load products
-  useEffect(() => {
-    fetch("/api/products")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setProducts(data.products);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  async function handleSaveProduct() {
-    const res = await fetch("/api/products", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        description,
-        price: Number(price), // 🔑 CRITICAL FIX
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.error || "Failed to save product");
-      return;
-    }
-
-    setProducts((prev) => [...prev, data.product]);
-    setTitle("");
-    setDescription("");
-    setPrice("");
+    revalidatePath("/creator/products")
   }
 
+  const { data: products } = await supabase
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false })
+
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10 space-y-10">
-      <h1 className="text-2xl font-bold">Your Products</h1>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-6">Your Products</h1>
 
-      {/* CREATE PRODUCT */}
-      <div className="space-y-4 border p-4 rounded-lg">
-        <input
-          className="w-full p-2 border rounded"
-          placeholder="Product title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-
-        <textarea
-          className="w-full p-2 border rounded"
-          placeholder="Product description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-
-        <input
-          className="w-full p-2 border rounded"
-          placeholder="Price (USD)"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-        />
-
-        <button
-          onClick={handleSaveProduct}
-          className="px-4 py-2 bg-black text-white rounded"
-        >
-          Save Product
-        </button>
-      </div>
-
-      {/* PRODUCT LIST */}
-      {loading && <p className="text-muted-foreground">Loading products…</p>}
-
-      {!loading && products.length === 0 && (
-        <p className="text-muted-foreground">
-          No products yet. Create one above.
-        </p>
+      {products && products.length === 0 && (
+        <p>No products yet.</p>
       )}
 
       <div className="space-y-4">
-        {products.map((product) => (
+        {products?.map((product) => (
           <div
             key={product.id}
-            className="border rounded-lg p-4 flex justify-between"
+            className="border p-4 rounded flex justify-between items-center"
           >
             <div>
-              <h2 className="font-semibold">{product.title}</h2>
-              <p className="text-sm text-muted-foreground">
-                {product.description}
-              </p>
+              <h2 className="text-xl font-semibold">{product.title}</h2>
+              <p className="text-gray-400">${product.price}</p>
             </div>
-            <span className="font-semibold">
-              ${product.price.toFixed(2)}
-            </span>
-          </div>
-        ))}
+
+<div className="flex gap-3">
+  <Link
+    href={`/products/${product.id}`}
+    className="text-blue-500 underline"
+  >
+    View
+  </Link>
+
+  <Link
+    href={`/creator/products/${product.id}/edit`}
+    className="text-blue-600 underline"
+  >
+    Edit
+  </Link>
+
+  <form action={deleteProduct}>
+    <input type="hidden" name="id" value={product.id} />
+    <button
+      type="submit"
+      className="text-red-500 underline"
+    >
+      Delete
+    </button>
+  </form>
+</div>
+            </div>
+))}
       </div>
     </div>
-  );
+  )
 }

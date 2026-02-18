@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  engineType      = "binary"
 }
 
 datasource db {
@@ -11,6 +12,6 @@ model Product {
   title       String
   description String
   price       Float
-  imageUrl    String
+  imageUrl    String?
   createdAt   DateTime @default(now())
 }

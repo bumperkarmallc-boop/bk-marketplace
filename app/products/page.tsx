@@ -1,59 +1,52 @@
-import Link from "next/link";
-
-type Product = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-};
-
-async function getProducts(): Promise<Product[]> {
-  const res = await fetch("http://localhost:3000/api/products", {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
-  }
-
-  const data = await res.json();
-  return data.products ?? [];
-}
+import Link from "next/link"
+import { supabase } from "@/lib/supabase"
 
 export default async function ProductsPage() {
-  const products = await getProducts();
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    return (
+      <div style={{ padding: "2rem" }}>
+        <h1>All Products</h1>
+        <p style={{ marginTop: "1rem", color: "red" }}>
+          Error loading products: {error.message}
+        </p>
+      </div>
+    )
+  }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold mb-8">All Products</h1>
+    <div style={{ padding: "2rem", maxWidth: "960px" }}>
+      <h1>All Products</h1>
 
-      {products.length === 0 && (
-        <p className="text-muted-foreground">
-          No products available yet.
-        </p>
+      {!products || products.length === 0 ? (
+        <p style={{ marginTop: "1rem" }}>No products available yet.</p>
+      ) : (
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {products.map((product) => (
+            <li key={product.id} style={{ marginBottom: "2rem" }}>
+              <Link href={`/products/${product.id}`}>
+                <div
+                  style={{
+                    padding: "1.5rem",
+                    border: "1px solid #333",
+                    borderRadius: "10px",
+                  }}
+                >
+                  <h2>{product.title}</h2>
+                  <p style={{ fontWeight: "bold" }}>
+                    ${Number(product.price).toFixed(2)}
+                  </p>
+                  <p>{product.description}</p>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {products.map((product) => (
-          <Link
-            key={product.id}
-            href={`/products/${product.id}`}
-            className="block border rounded-lg p-4 hover:bg-muted transition"
-          >
-            <h2 className="font-semibold mb-1">
-              {product.title}
-            </h2>
-
-            <p className="text-sm text-muted-foreground mb-3">
-              {product.description}
-            </p>
-
-            <p className="font-bold">
-              ${product.price.toFixed(2)}
-            </p>
-          </Link>
-        ))}
-      </div>
     </div>
-  );
+  )
 }

@@ -13,11 +13,22 @@ export default async function EditProductPage({
 
 const supabase = await createSupabaseServerClient()
 
-  const { data: product } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", id)
-    .single()
+const {
+  data: { session },
+} = await supabase.auth.getSession()
+
+const user = session?.user
+
+if (!user) {
+  return <div className="p-8">Unauthorized</div>
+}
+
+const { data: product } = await supabase
+  .from("products")
+  .select("*")
+  .eq("id", id)
+  .eq("user_id", user.id)
+  .single()
 
   if (!product) {
     return <div className="p-8">Product not found</div>

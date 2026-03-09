@@ -1,27 +1,27 @@
 import { notFound } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
-
+import AddToCartButton from "../../../components/AddToCartButton";
 export default async function ProductPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
   const { data: product, error } = await supabase
     .from("products")
-.select("id, title, description, price, image, created_at")
-.eq("id", id)
+    .select("id, title, description, price, image, created_at")
+    .eq("id", id)
     .single();
 
-if (error) {
-  console.log("SUPABASE ERROR:", error);
-  return notFound();
-}
+  if (error) {
+    console.log("SUPABASE ERROR:", error);
+    return notFound();
+  }
 
-if (!product) {
-  console.log("NO PRODUCT FOUND");
-  return notFound();
-}
+  if (!product) {
+    return notFound();
+  }
 
   return (
     <div style={{ padding: "2rem", maxWidth: "800px" }}>
@@ -34,6 +34,12 @@ if (!product) {
       <p style={{ marginTop: "1.5rem", opacity: 0.8 }}>
         {product.description}
       </p>
+
+      <AddToCartButton
+        id={product.id}
+        title={product.title}
+        price={product.price}
+      />
     </div>
   );
 }

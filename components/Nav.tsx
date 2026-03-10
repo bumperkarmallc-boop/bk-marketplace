@@ -32,6 +32,7 @@ useEffect(() => {
         <Link href="/creator">Creator</Link>
         <Link href="/how-it-works">How It Works</Link>
 <Link href="/cart">Cart ({count})</Link>
+<Link href="/login">Login</Link>
       </div>
     </nav>
   );

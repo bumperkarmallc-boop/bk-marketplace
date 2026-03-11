@@ -67,7 +67,24 @@ export default function CartPage() {
         </div>
       ))}
 
-      <h2>Subtotal: ${subtotal.toFixed(2)}</h2>
-    </main>
+<h2>Subtotal: ${subtotal.toFixed(2)}</h2>
+
+<button
+  style={{
+    marginTop: "20px",
+    padding: "12px 20px",
+    background: "#fff",
+    color: "#000",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "bold"
+  }}
+  onClick={() => window.location.href = "/checkout"}
+>
+  Proceed to Checkout
+</button>
+
+</main>
+
   )
 }

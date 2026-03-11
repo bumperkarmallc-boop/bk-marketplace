@@ -6,15 +6,19 @@ export default function CreatorOrdersPage() {
   const [orders, setOrders] = useState([])
 
   useEffect(() => {
-    const loadOrders = async () => {
-      const { data } = await supabaseBrowser
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false })
+const loadOrders = async () => {
 
-      setOrders(data || [])
-    }
+  const { data: { user } } = await supabaseBrowser.auth.getUser()
 
+if (!user) return
+  const { data } = await supabaseBrowser
+    .from("orders")
+    .select("*, products(name)")
+    .eq("seller_id", user.id)
+    .order("created_at", { ascending: false })
+
+  setOrders(data || [])
+}
     loadOrders()
   }, [])
 
@@ -36,7 +40,7 @@ export default function CreatorOrdersPage() {
         <tbody>
           {orders.map((order) => (
             <tr key={order.id} className="border-b">
-              <td className="p-2">{order.product_id}</td>
+              <td className="p-2">{order.products?.name}</td>
               <td className="p-2">{order.buyer_id}</td>
               <td className="p-2">${order.price}</td>
               <td className="p-2">{order.status}</td>

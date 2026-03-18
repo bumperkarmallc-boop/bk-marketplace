@@ -48,12 +48,20 @@ const orderId = data[0].id
 // save items to order_items
 const itemsToInsert = cart.map(item => ({
 order_id: orderId,
-  product_id: item.id,
+product_id: item.product_id,
   quantity: item.quantity,
   price: item.price
 }))
 
-await supabaseBrowser.from("order_items").insert(itemsToInsert)
+const { error: itemsError } = await supabaseBrowser
+  .from("order_items")
+  .insert(itemsToInsert)
+
+if (itemsError) {
+  console.error("ITEMS ERROR:", itemsError)
+  alert("Items failed")
+  return
+}
 window.location.href = "/orders"
     localStorage.removeItem("cart")
     setCart([])

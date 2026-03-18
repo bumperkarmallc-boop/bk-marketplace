@@ -30,23 +30,30 @@ const subtotal = cart.reduce((sum, item) => {
       return
     }
 
-    for (const item of cart) {
 
-      const { error } = await supabaseBrowser
+     const { data, error } = await supabaseBrowser
         .from("orders")
 .insert({
-  buyer_id: user.id,
-product_id: item.product_id,
-price: Number(item.price) * item.quantity,
+ buyer_id: user.id,
+total: subtotal,
 })
+.select()
+const orderId = data[0].id
       if (error) {
         console.error("ORDER ERROR:", error)
         alert("Order failed")
         return
       }
 
-    }
+// save items to order_items
+const itemsToInsert = cart.map(item => ({
+order_id: orderId,
+  product_id: item.id,
+  quantity: item.quantity,
+  price: item.price
+}))
 
+await supabaseBrowser.from("order_items").insert(itemsToInsert)
 window.location.href = "/orders"
     localStorage.removeItem("cart")
     setCart([])

@@ -46,8 +46,13 @@ export default async function OrdersPage() {
             marginTop: "20px",
           }}
         >
-          <p><strong>Order ID:</strong> {order.id}</p>
-          <p><strong>Total:</strong> ${order.price}</p>
+<p>
+  <strong>Order ID:</strong>{" "}
+  <a href={`/orders/${order.id}`} style={{ color: "#4da6ff" }}>
+    {order.id}
+  </a>
+</p>   
+       <p><strong>Total:</strong> ${order.price}</p>
           <p><strong>Status:</strong> {order.status}</p>
           <p><strong>Date:</strong> {new Date(order.created_at).toLocaleString()}</p>
         </div>

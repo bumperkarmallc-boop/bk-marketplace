@@ -10,7 +10,7 @@ export default async function ProductPage({
 
   const { data: product, error } = await supabase
     .from("products")
-    .select("id, title, description, price, image, created_at")
+.select("id, title, description, price, image, created_at, user_id")
     .eq("id", id)
     .single();
 
@@ -35,11 +35,12 @@ export default async function ProductPage({
         {product.description}
       </p>
 
-      <AddToCartButton
-        id={product.id}
-        title={product.title}
-        price={product.price}
-      />
+<AddToCartButton
+  id={product.id}
+  title={product.title}
+  price={product.price}
+  seller_id={product.seller_id}
+/>
     </div>
   );
 }

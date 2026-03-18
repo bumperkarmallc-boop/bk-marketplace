@@ -1,7 +1,7 @@
 export function getCart() {
   if (typeof window === "undefined") return []
 
-  const cart = localStorage.getItem("bk_cart")
+  const cart = localStorage.getItem("cart")
 
   if (!cart) return []
 
@@ -9,7 +9,7 @@ export function getCart() {
 }
 
 export function saveCart(cart) {
-  localStorage.setItem("bk_cart", JSON.stringify(cart))
+localStorage.setItem("cart", JSON.stringify(cart))
 }
 
 export function addToCart(item) {

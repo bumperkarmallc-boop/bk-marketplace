@@ -1,49 +1,57 @@
-"use client"
+import { createServerClient } from "@supabase/ssr"
+import { cookies } from "next/headers"
 
-import { useEffect, useState } from "react"
-import { supabaseBrowser } from "@/lib/supabase-browser"
+export default async function OrdersPage() {
 
-export default function OrdersPage() {
-  const [orders, setOrders] = useState<any[]>([])
+  const cookieStore = await cookies()
 
-  useEffect(() => {
-    const loadOrders = async () => {
-      const { data: { user } } = await supabaseBrowser.auth.getUser()
-
-      if (!user) return
-
-      const { data } = await supabaseBrowser
-        .from("orders")
-        .select("*")
-        .eq("buyer_id", user.id)
-        .order("created_at", { ascending: false })
-
-      if (data) {
-        setOrders(data)
-      }
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name: string) => cookieStore.get(name)?.value,
+        set: () => {},
+        remove: () => {},
+      },
     }
+  )
 
-    loadOrders()
-  }, [])
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return <div>Please login to view your orders.</div>
+  }
+
+  const { data: orders } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("buyer_id", user.id)
+    .order("created_at", { ascending: false })
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Your Orders</h1>
+    <div style={{ padding: "40px", color: "white" }}>
+      <h1>Your Orders</h1>
 
-      {orders.length === 0 && (
+      {(!orders || orders.length === 0) && (
         <p>No orders yet.</p>
       )}
 
-      <div className="space-y-4">
-        {orders.map((order) => (
-          <div key={order.id} className="border p-4 rounded-lg">
-            <p><strong>Order ID:</strong> {order.id}</p>
-            <p><strong>Status:</strong> {order.status}</p>
-            <p><strong>Total:</strong> ${order.total}</p>
-            <p><strong>Date:</strong> {new Date(order.created_at).toLocaleString()}</p>
-          </div>
-        ))}
-      </div>
+      {orders?.map((order) => (
+        <div
+          key={order.id}
+          style={{
+            border: "1px solid #444",
+            padding: "20px",
+            marginTop: "20px",
+          }}
+        >
+          <p><strong>Order ID:</strong> {order.id}</p>
+          <p><strong>Total:</strong> ${order.price}</p>
+          <p><strong>Status:</strong> {order.status}</p>
+          <p><strong>Date:</strong> {new Date(order.created_at).toLocaleString()}</p>
+        </div>
+      ))}
     </div>
   )
 }

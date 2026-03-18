@@ -56,7 +56,7 @@ export default function CartPage() {
       {cart.length === 0 && <p>Your cart is empty.</p>}
 
       {cart.map(item => (
-        <div key={item.id} style={{ marginBottom: "20px" }}>
+        <div key={item.product_id} style={{ marginBottom: "20px" }}>
           <h3>{item.name}</h3>
           <p>${item.price}</p>
           <p>Qty: {item.quantity}</p>
@@ -70,13 +70,14 @@ export default function CartPage() {
 <h2>Subtotal: ${subtotal.toFixed(2)}</h2>
 
 <button
+disabled={cart.length === 0}
   style={{
     marginTop: "20px",
     padding: "12px 20px",
     background: "#fff",
     color: "#000",
     border: "none",
-    cursor: "pointer",
+cursor: cart.length === 0 ? "not-allowed" : "pointer",
     fontWeight: "bold"
   }}
   onClick={() => window.location.href = "/checkout"}

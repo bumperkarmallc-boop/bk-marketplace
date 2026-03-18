@@ -6,11 +6,23 @@ import { getCart } from "@/lib/cartStore"
 export default function Nav() {
 const [count, setCount] = useState(0)
 
+
 useEffect(() => {
-  const cart = getCart()
-  const total = cart.reduce((sum, item) => sum + item.qty, 0)
-  setCount(total)
+  const updateCart = () => {
+    const cart = getCart()
+    const total = cart.reduce((sum, item) => sum + item.quantity, 0)
+    setCount(total)
+  }
+
+  updateCart()
+  window.addEventListener("storage", updateCart)
+window.addEventListener("click", updateCart)
+return () => {
+  window.removeEventListener("storage", updateCart)
+  window.removeEventListener("click", updateCart)
+}
 }, [])
+
   return (
     <nav
       style={{

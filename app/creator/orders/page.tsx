@@ -1,56 +1,57 @@
-"use client"
+import { createServerClient } from "@supabase/ssr"
+import { cookies } from "next/headers"
 
-import { useEffect, useState } from "react"
-import { supabaseBrowser } from "@/lib/supabase-browser"
-export default function CreatorOrdersPage() {
-  const [orders, setOrders] = useState([])
+export default async function CreatorOrdersPage() {
 
-  useEffect(() => {
-const loadOrders = async () => {
+  const cookieStore = await cookies()
 
-  const { data: { user } } = await supabaseBrowser.auth.getUser()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name: string) => cookieStore.get(name)?.value,
+        set: () => {},
+        remove: () => {},
+      },
+    }
+  )
 
-if (!user) return
-  const { data } = await supabaseBrowser
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return <div>Please login to view your orders.</div>
+  }
+
+  const { data: orders } = await supabase
     .from("orders")
-    .select("*, products(name)")
+    .select("*")
     .eq("seller_id", user.id)
     .order("created_at", { ascending: false })
 
-  setOrders(data || [])
-}
-    loadOrders()
-  }, [])
-
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Orders</h1>
+    <div style={{ padding: "40px", color: "white" }}>
+      <h1>Orders For Your Products</h1>
 
-      <table className="w-full border">
-        <thead>
-          <tr className="border-b">
-            <th className="text-left p-2">Product</th>
-            <th className="text-left p-2">Buyer</th>
-            <th className="text-left p-2">Price</th>
-            <th className="text-left p-2">Status</th>
-            <th className="text-left p-2">Date</th>
-          </tr>
-        </thead>
+      {(!orders || orders.length === 0) && (
+        <p>No orders yet.</p>
+      )}
 
-        <tbody>
-          {orders.map((order) => (
-            <tr key={order.id} className="border-b">
-              <td className="p-2">{order.products?.name}</td>
-              <td className="p-2">{order.buyer_id}</td>
-              <td className="p-2">${order.price}</td>
-              <td className="p-2">{order.status}</td>
-              <td className="p-2">
-                {new Date(order.created_at).toLocaleDateString()}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {orders?.map((order) => (
+        <div
+          key={order.id}
+          style={{
+            border: "1px solid #444",
+            padding: "20px",
+            marginTop: "20px",
+          }}
+        >
+          <p><strong>Order ID:</strong> {order.id}</p>
+          <p><strong>Total:</strong> ${order.price}</p>
+          <p><strong>Status:</strong> {order.status}</p>
+          <p><strong>Date:</strong> {new Date(order.created_at).toLocaleString()}</p>
+        </div>
+      ))}
     </div>
   )
 }

@@ -11,12 +11,7 @@ const supabase = createClient(
 
 export default function OrderDetailsPage() {
 const params = useParams()
-const id =
-  typeof params.id === "string"
-    ? params.id
-    : Array.isArray(params.id)
-    ? params.id[0]
-    : ""
+const id = Array.isArray(params.id) ? params.id[0] : params.id
   const [order, setOrder] = useState<any>(null)
   const [items, setItems] = useState<any[]>([])
 
@@ -27,14 +22,14 @@ const id =
         .select("*")
         .eq("id", id)
         .single()
-
+https://www2.lunapic.com/editor/
       setOrder(data)
 
       const { data: itemsData } = await supabase
         .from("order_items")
         .select("*")
-.eq("order_id", id as string)
-console.log("ITEMS DATA:", itemsData)
+        .eq("order_id", id)
+
       setItems(itemsData || [])
     }
 
@@ -45,7 +40,7 @@ console.log("ITEMS DATA:", itemsData)
 
   return (
     <div style={{ padding: "20px" }}>
-    <h1>Order Details</h1>
+      <h1>Order Details</h1>
 
       <p><strong>Order ID:</strong> {order.id}</p>
       <p><strong>Total:</strong> ${order.total}</p>

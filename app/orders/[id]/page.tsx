@@ -19,6 +19,7 @@ const id =
     : ""
   const [order, setOrder] = useState<any>(null)
   const [items, setItems] = useState<any[]>([])
+const [products, setProducts] = useState<any[]>([])
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -36,6 +37,14 @@ const id =
 .eq("order_id", id as string)
 console.log("ITEMS DATA:", itemsData)
       setItems(itemsData || [])
+const productIds = (itemsData || []).map(item => item.product_id)
+
+const { data: productsData } = await supabase
+  .from("products")
+  .select("*")
+  .in("id", productIds)
+
+setProducts(productsData || [])
     }
 
     if (id) fetchOrder()
@@ -58,7 +67,7 @@ console.log("ITEMS DATA:", itemsData)
       ) : (
         items.map((item) => (
           <div key={item.id} style={{ marginBottom: "10px" }}>
-            <p>Product ID: {item.product_id}</p>
+<p>Product: {products.find(p => p.id === item.product_id)?.title || item.product_id}</p>
             <p>Quantity: {item.quantity}</p>
             <p>Price: ${item.price}</p>
           </div>

@@ -63,7 +63,7 @@ export default async function CreatorOrdersPage() {
           }}
         >
           <p><strong>Order ID:</strong> {order.id}</p>
-          <p><strong>Total:</strong> ${order.price}</p>
+          <p><strong>Total:</strong> ${order.total}</p>
           <p><strong>Status:</strong> {order.status}</p>
           <p><strong>Date:</strong> {new Date(order.created_at).toLocaleString()}</p>
         </div>

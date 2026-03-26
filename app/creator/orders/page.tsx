@@ -2,7 +2,6 @@ import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 
 export default async function CreatorOrdersPage() {
-
   const cookieStore = await cookies()
 
   const supabase = createServerClient(
@@ -23,10 +22,27 @@ export default async function CreatorOrdersPage() {
     return <div>Please login to view your orders.</div>
   }
 
+  // STEP 1: get your product IDs
+  const { data: products } = await supabase
+    .from("products")
+    .select("id")
+    .eq("user_id", user.id)
+
+  const productIds = products?.map(p => p.id) || []
+
+  // STEP 2: get order_items that use your products
+  const { data: orderItems } = await supabase
+    .from("order_items")
+    .select("order_id")
+    .in("product_id", productIds)
+
+  const orderIds = orderItems?.map(item => item.order_id) || []
+
+  // STEP 3: get the actual orders
   const { data: orders } = await supabase
     .from("orders")
     .select("*")
-    .eq("seller_id", user.id)
+    .in("id", orderIds)
     .order("created_at", { ascending: false })
 
   return (
@@ -37,7 +53,7 @@ export default async function CreatorOrdersPage() {
         <p>No orders yet.</p>
       )}
 
-      {orders?.map((order) => (
+      {orders?.map(order => (
         <div
           key={order.id}
           style={{

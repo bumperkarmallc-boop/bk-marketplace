@@ -1,0 +1,55 @@
+# Build check for recovery work branches.
+# Runs on GitHub's servers when a recovery/* branch is pushed.
+# It never deploys, never touches main, and uses NO real secrets:
+# the Supabase values below are harmless placeholders so the build can run.
+name: Build check
+
+on:
+  push:
+    branches:
+      - "recovery/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Type check
+        id: typecheck
+        continue-on-error: true
+        run: npx tsc --noEmit
+      - name: Lint
+        id: lint
+        continue-on-error: true
+        run: npm run lint
+      - name: Build
+        id: build
+        continue-on-error: true
+        run: npm run build
+      - name: Summary
+        run: |
+          echo "Type check: ${{ steps.typecheck.outcome }}"
+          echo "Lint:       ${{ steps.lint.outcome }}"
+          echo "Build:      ${{ steps.build.outcome }}"
+          {
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| Type check | ${{ steps.typecheck.outcome }} |"
+            echo "| Lint | ${{ steps.lint.outcome }} |"
+            echo "| Build | ${{ steps.build.outcome }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.build.outcome }}" != "success" ]; then exit 1; fi

@@ -41,7 +41,7 @@ jobs:
         id: typecheck
         continue-on-error: true
         run: |
-          set -o pipefail
+          set +e
           npx tsc --noEmit --pretty false 2>&1 | tee typecheck.log
           status=${PIPESTATUS[0]}
           if [ "$status" != "0" ]; then
@@ -52,8 +52,8 @@ jobs:
         id: lint
         continue-on-error: true
         run: |
-          set -o pipefail
-          npx eslint . --format unix 2>&1 | tee lint.log
+          set +e
+          npx eslint . 2>&1 | tee lint.log
           status=${PIPESTATUS[0]}
           if [ "$status" != "0" ]; then
             echo "::error title=LINT FULL OUTPUT::$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' lint.log | head -c 60000)"
@@ -63,7 +63,7 @@ jobs:
         id: build
         continue-on-error: true
         run: |
-          set -o pipefail
+          set +e
           npm run build 2>&1 | tee build.log
           status=${PIPESTATUS[0]}
           if [ "$status" != "0" ]; then

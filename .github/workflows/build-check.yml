@@ -28,6 +28,13 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      # Turn off automatic per-error notes (GitHub caps them at 10), so the
+      # single "FULL OUTPUT" note below is always visible.
+      - name: Disable automatic error notes
+        run: |
+          echo "::remove-matcher owner=tsc::"
+          echo "::remove-matcher owner=eslint-compact::"
+          echo "::remove-matcher owner=eslint-stylish::"
       # Each check publishes its complete output as ONE note, because GitHub
       # only shows 10 separate error notes per step on public pages.
       - name: Type check

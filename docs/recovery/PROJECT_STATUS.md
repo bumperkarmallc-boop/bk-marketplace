@@ -75,7 +75,13 @@ See `git diff backup/main-2026-10-20..recovery/stage-2-security`. Each commit me
 Rollback scripts in `docs/recovery/rollback/` and `docs/recovery/proposed/` — they RESTORE the original vulnerabilities.
 
 ## 8. Tests and results
-See the status report in the conversation and the build-check runs on GitHub (Actions tab).
+| Date | What | Where | Result |
+|---|---|---|---|
+| 2026-10-19 | Stage A security test (13 checks) | live Supabase, self-undoing | ✅ 13/13; no leftover data (read-only count) |
+| 2026-10-20 | Build check, original `main` code | GitHub Actions run 39449063517 | ❌ type check, lint, build all fail |
+| 2026-10-20 | Build check, working branch `140b6d0` | GitHub Actions run 39450049314 | ✅ type check · ✅ build · 🟡 lint: 2 style warnings-as-errors (setState in effect, cart & checkout) |
+| 2026-10-20 | Storage ownership rules (18 checks) | practice copy (not Supabase) | ✅ 18/18 after; 9 failures with today's rules; sabotage caught; undo identical |
+| — | Click-through of cart/checkout/orders | — | ⬜ not done (needs a deployed preview or local run) |
 
 ## 9. Needed from the owner
 See "Decisions" in the latest status report.

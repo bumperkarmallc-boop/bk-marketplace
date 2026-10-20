@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
+
+// Same limits as the Supabase "product-images" bucket
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
 // Load Cloudinary credentials from .env.local
 cloudinary.config({
@@ -9,6 +14,19 @@ cloudinary.config({
 });
 export async function POST(req: Request) {
   try {
+    // Only logged-in users may upload
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Please log in to upload" },
+        { status: 401 }
+      );
+    }
+
     const formData = await req.formData();
 
     const title = formData.get("title") as string;
@@ -19,6 +37,20 @@ export async function POST(req: Request) {
     if (!title || !description || !price || !image) {
       return NextResponse.json(
         { error: "Missing fields" },
+        { status: 400 }
+      );
+    }
+
+    // Images only, 5 MB max
+    if (!ALLOWED_IMAGE_TYPES.includes(image.type)) {
+      return NextResponse.json(
+        { error: "Only PNG, JPG, WEBP or GIF images are allowed" },
+        { status: 400 }
+      );
+    }
+    if (image.size > MAX_IMAGE_BYTES) {
+      return NextResponse.json(
+        { error: "Image must be 5 MB or smaller" },
         { status: 400 }
       );
     }

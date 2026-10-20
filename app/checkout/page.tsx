@@ -21,51 +21,40 @@ useEffect(() => {
 const subtotal = cart.reduce((sum, item) => {
   return sum + Number(item.price) * item.quantity
 }, 0)
+  const [submitting, setSubmitting] = useState(false)
+
+  // The order is created by the database function `place_order`.
+  // The browser sends only product IDs and quantities; the database looks up
+  // the real prices and calculates the total, so prices cannot be faked here.
   const createOrder = async () => {
+    if (submitting) return // ignore double clicks
+    setSubmitting(true)
 
     const { data: { user } } = await supabaseBrowser.auth.getUser()
 
     if (!user) {
       alert("Please log in first")
+      setSubmitting(false)
       return
     }
 
+    const items = cart.map(item => ({
+      product_id: item.product_id,
+      quantity: item.quantity,
+    }))
 
-     const { data, error } = await supabaseBrowser
-        .from("orders")
-.insert({
- buyer_id: user.id,
-total: subtotal,
-})
-.select()
-const orderId = data[0].id
-      if (error) {
-        console.error("ORDER ERROR:", error)
-        alert("Order failed")
-        return
-      }
+    const { error } = await supabaseBrowser.rpc("place_order", { items })
 
-// save items to order_items
-const itemsToInsert = cart.map(item => ({
-order_id: orderId,
-product_id: item.product_id,
-  quantity: item.quantity,
-  price: item.price
-}))
+    if (error) {
+      console.error("ORDER ERROR:", error)
+      alert("Order failed: " + error.message)
+      setSubmitting(false)
+      return
+    }
 
-const { error: itemsError } = await supabaseBrowser
-  .from("order_items")
-  .insert(itemsToInsert)
-
-if (itemsError) {
-  console.error("ITEMS ERROR:", itemsError)
-  alert("Items failed")
-  return
-}
-window.location.href = "/orders"
     localStorage.removeItem("cart")
     setCart([])
-
+    window.location.href = "/orders"
   }
 
   return (
@@ -86,13 +75,14 @@ window.location.href = "/orders"
 
       <button
         onClick={createOrder}
+        disabled={submitting}
         style={{
           marginTop: "2rem",
           padding: "10px 18px",
           background: "black",
           color: "white",
           border: "none",
-          cursor: "pointer"
+          cursor: submitting ? "not-allowed" : "pointer"
         }}
       >
         Continue to Payment

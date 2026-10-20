@@ -1,14 +1,11 @@
 "use client";
 
 export default function UploadPage() {
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("title", e.target.title.value);
-    formData.append("description", e.target.description.value);
-    formData.append("price", e.target.price.value);
-    formData.append("image", e.target.image.files[0]);
+    // Same fields as before: title, description, price, image
+    const formData = new FormData(e.currentTarget);
 
     try {
       const res = await fetch("/api/upload", {

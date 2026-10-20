@@ -1,42 +1,27 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { addToCart } from "@/lib/cartStore";
 
 type Props = {
   id: string;
   title: string;
   price: number;
-  seller_id: string;
+  seller_id: string | null;
 };
 
 export default function AddToCartButton({ id, title, price, seller_id }: Props) {
   const router = useRouter();
 
-  const addToCart = () => {
-    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
-
-const existingItem = existingCart.find((item: any) => item.product_id === id);
-
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-existingCart.push({
-  product_id: id,
-  seller_id,
-  title,
-  price,
-  quantity: 1,
-});
-    }
-
-    localStorage.setItem("cart", JSON.stringify(existingCart));
+  const handleAddToCart = () => {
+    addToCart({ product_id: id, seller_id, title, price });
     alert("Added to cart");
     router.push("/cart");
   };
 
   return (
     <button
-      onClick={addToCart}
+      onClick={handleAddToCart}
       style={{
         marginTop: "2rem",
         padding: "0.75rem 1.5rem",

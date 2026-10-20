@@ -1,47 +1,38 @@
 "use client"
 
 import { useEffect, useState } from "react"
-
-type CartItem = {
-  id: string
-  name: string
-  price: number
-  quantity: number
-}
+import { getCart, saveCart, type CartItem } from "@/lib/cartStore"
 
 export default function CartPage() {
   const [cart, setCart] = useState<CartItem[]>([])
 
   useEffect(() => {
-    const stored = localStorage.getItem("cart")
-    if (stored) {
-      setCart(JSON.parse(stored))
-    }
+    setCart(getCart())
   }, [])
 
   const updateCart = (newCart: CartItem[]) => {
     setCart(newCart)
-    localStorage.setItem("cart", JSON.stringify(newCart))
+    saveCart(newCart)
   }
 
-  const increase = (id: string) => {
+  const increase = (productId: string) => {
     const updated = cart.map(item =>
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+      item.product_id === productId ? { ...item, quantity: item.quantity + 1 } : item
     )
     updateCart(updated)
   }
 
-  const decrease = (id: string) => {
+  const decrease = (productId: string) => {
     const updated = cart.map(item =>
-      item.id === id && item.quantity > 1
+      item.product_id === productId && item.quantity > 1
         ? { ...item, quantity: item.quantity - 1 }
         : item
     )
     updateCart(updated)
   }
 
-  const remove = (id: string) => {
-    const updated = cart.filter(item => item.id !== id)
+  const remove = (productId: string) => {
+    const updated = cart.filter(item => item.product_id !== productId)
     updateCart(updated)
   }
 
@@ -57,13 +48,13 @@ export default function CartPage() {
 
       {cart.map(item => (
         <div key={item.product_id} style={{ marginBottom: "20px" }}>
-          <h3>{item.name}</h3>
+          <h3>{item.title}</h3>
           <p>${item.price}</p>
           <p>Qty: {item.quantity}</p>
 
-          <button onClick={() => increase(item.id)}>+</button>
-          <button onClick={() => decrease(item.id)}>-</button>
-          <button onClick={() => remove(item.id)}>Remove</button>
+          <button onClick={() => increase(item.product_id)}>+</button>
+          <button onClick={() => decrease(item.product_id)}>-</button>
+          <button onClick={() => remove(item.product_id)}>Remove</button>
         </div>
       ))}
 

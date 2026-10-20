@@ -1,12 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getCart } from "@/lib/cartStore"
+import { getCart, type CartItem } from "@/lib/cartStore"
 import { supabaseBrowser } from "@/lib/supabase-browser"
 
 export default function CheckoutPage() {
 
-  const [cart, setCart] = useState<any[]>([])
+  const [cart, setCart] = useState<CartItem[]>([])
 
 useEffect(() => {
   const items = getCart()

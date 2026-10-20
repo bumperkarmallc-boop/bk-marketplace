@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { createClient } from "@supabase/supabase-js"
+// Use the same logged-in browser client as the rest of the site, so the
+// database knows who is asking (the old standalone client had no login).
+import { supabaseBrowser as supabase } from "@/lib/supabase-browser"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+type Order = { id: string; total: number | null; status: string | null }
+type OrderItem = { id: string; product_id: string | null; quantity: number | null; price: number | null }
+type ProductTitle = { id: string; title: string }
 
 export default function OrderDetailsPage() {
 const params = useParams()
@@ -17,9 +18,9 @@ const id =
     : Array.isArray(params.id)
     ? params.id[0]
     : ""
-  const [order, setOrder] = useState<any>(null)
-  const [items, setItems] = useState<any[]>([])
-const [products, setProducts] = useState<any[]>([])
+  const [order, setOrder] = useState<Order | null>(null)
+  const [items, setItems] = useState<OrderItem[]>([])
+const [products, setProducts] = useState<ProductTitle[]>([])
 
   useEffect(() => {
     const fetchOrder = async () => {

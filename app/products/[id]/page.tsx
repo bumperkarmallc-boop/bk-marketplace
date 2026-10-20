@@ -39,7 +39,7 @@ export default async function ProductPage({
   id={product.id}
   title={product.title}
   price={product.price}
-  seller_id={product.seller_id}
+  seller_id={product.user_id}
 />
     </div>
   );

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
-import { createSupabaseServerClient } from "@/lib/supabase"
+import { createSupabaseServerClient } from "@/lib/supabase-server"
 
 export async function GET() {
-  const supabase = createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase
     .from("products")
@@ -17,7 +17,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const supabase = createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
 
   const body = await req.json()
   const { title, description, price } = body
@@ -49,6 +49,7 @@ export async function POST(req: Request) {
         title,
         description,
         price,
+        user_id: user.id, // required by the database rule "insert their own products"
       },
     ])
     .select()

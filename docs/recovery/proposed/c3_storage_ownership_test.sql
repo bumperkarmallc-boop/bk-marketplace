@@ -24,11 +24,14 @@ declare
   ub uuid := '00000000-0000-4000-a000-00000000000b';
   fa text := '00000000-0000-4000-a000-00000000000a/bk-test-' || md5(random()::text) || '.png';
   fb text := '00000000-0000-4000-a000-00000000000b/bk-test-' || md5(random()::text) || '.png';
+  la text := '00000000-0000-4000-a000-00000000000a-bk-test-legacy-' || md5(random()::text) || '.png';  -- A's top-level legacy image
   nm text; real_before int; n int;
   passes int := 0; fails int := 0; inconcl int := 0; checks int := 0;
   r text := '';
 begin
   select count(*) into real_before from storage.objects where bucket_id='product-images' and name not like '%bk-test-%';
+  -- Setup (as admin): a temporary top-level LEGACY image owned by A, like the real existing image
+  insert into storage.objects (bucket_id, name, owner_id) values ('product-images', la, ua::text);
 
   -- S0 simulation active
   checks := checks + 1;
@@ -221,6 +224,124 @@ begin
     perform set_config('role', admin_role, true);
   exception when others then fails:=fails+1; r:=r||'FAIL D2 error: '||sqlerrm||' | '; end;
 
+  ------------------------------------------------------------------
+  -- LEGACY top-level image (like the real existing image)
+  ------------------------------------------------------------------
+  -- L1 B cannot replace A's legacy image
+  checks := checks + 1;
+  begin
+    perform set_config('request.jwt.claim.sub', ub::text, true);
+    perform set_config('request.jwt.claim.role', 'authenticated', true);
+    perform set_config('request.jwt.claims', json_build_object('sub',ub,'role','authenticated')::text, true);
+    perform set_config('role', 'authenticated', true);
+    update storage.objects set owner_id = ub::text where bucket_id='product-images' and name=la;
+    get diagnostics n = row_count;
+    perform set_config('role', admin_role, true);
+    if n=0 and exists (select 1 from storage.objects where name=la and owner_id=ua::text) then passes:=passes+1; r:=r||'PASS L1 B cannot replace A''s legacy image | ';
+    else fails:=fails+1; r:=r||'FAIL L1 B replaced A''s legacy image | '; end if;
+  exception when others then fails:=fails+1; r:=r||'FAIL L1 error: '||sqlerrm||' | '; end;
+
+  -- L2 A (owner) CAN replace her legacy image in place (same name, new file data)
+  checks := checks + 1;
+  begin
+    perform set_config('request.jwt.claim.sub', ua::text, true);
+    perform set_config('request.jwt.claims', json_build_object('sub',ua,'role','authenticated')::text, true);
+    perform set_config('role', 'authenticated', true);
+    update storage.objects set owner_id = ua::text where bucket_id='product-images' and name=la;
+    get diagnostics n = row_count;
+    perform set_config('role', admin_role, true);
+    if n=1 then passes:=passes+1; r:=r||'PASS L2 owner can replace her legacy image in place | ';
+    else fails:=fails+1; r:=r||'FAIL L2 owner could not replace her legacy image (rows '||n||') | '; end if;
+  exception when others then fails:=fails+1; r:=r||'FAIL L2 error: '||sqlerrm||' | '; end;
+
+  -- L3 A cannot rename her legacy image into B's name space
+  checks := checks + 1;
+  begin
+    perform set_config('request.jwt.claim.sub', ua::text, true);
+    perform set_config('request.jwt.claims', json_build_object('sub',ua,'role','authenticated')::text, true);
+    perform set_config('role', 'authenticated', true);
+    begin
+      update storage.objects set name = ub::text || '-bk-test-squat.png' where bucket_id='product-images' and name=la;
+      get diagnostics n = row_count;
+      fails:=fails+1; r:=r||case when n=0 then 'FAIL L3 could not run (record missing) | ' else 'FAIL L3 legacy image moved into B''s name space | ' end;
+    exception when insufficient_privilege then passes:=passes+1; r:=r||'PASS L3 legacy image cannot be moved into B''s name space | ';
+      when others then fails:=fails+1; r:=r||'FAIL L3 wrong reason: '||sqlerrm||' | '; end;
+    perform set_config('role', admin_role, true);
+  exception when others then fails:=fails+1; r:=r||'FAIL L3 error: '||sqlerrm||' | '; end;
+
+  -- L4 A cannot rename her legacy image to an arbitrary top-level name
+  checks := checks + 1;
+  begin
+    perform set_config('request.jwt.claim.sub', ua::text, true);
+    perform set_config('request.jwt.claims', json_build_object('sub',ua,'role','authenticated')::text, true);
+    perform set_config('role', 'authenticated', true);
+    begin
+      update storage.objects set name = 'bk-test-anyname.png' where bucket_id='product-images' and name=la;
+      get diagnostics n = row_count;
+      fails:=fails+1; r:=r||case when n=0 then 'FAIL L4 could not run (record missing) | ' else 'FAIL L4 legacy image renamed outside owner name space | ' end;
+    exception when insufficient_privilege then passes:=passes+1; r:=r||'PASS L4 legacy image cannot be renamed outside owner name space | ';
+      when others then fails:=fails+1; r:=r||'FAIL L4 wrong reason: '||sqlerrm||' | '; end;
+    perform set_config('role', admin_role, true);
+  exception when others then fails:=fails+1; r:=r||'FAIL L4 error: '||sqlerrm||' | '; end;
+
+  -- L5 New uploads cannot use the legacy top-level naming (even your own ID)
+  checks := checks + 1;
+  begin
+    perform set_config('request.jwt.claim.sub', ub::text, true);
+    perform set_config('request.jwt.claims', json_build_object('sub',ub,'role','authenticated')::text, true);
+    perform set_config('role', 'authenticated', true);
+    begin
+      insert into storage.objects (bucket_id, name, owner_id) values ('product-images', ub::text || '-bk-test-toplevel.png', ub::text);
+      fails:=fails+1; r:=r||'FAIL L5 new top-level upload allowed | ';
+    exception when insufficient_privilege then passes:=passes+1; r:=r||'PASS L5 new uploads must use own folder (top-level refused) | ';
+      when others then fails:=fails+1; r:=r||'FAIL L5 wrong reason: '||sqlerrm||' | '; end;
+    perform set_config('role', admin_role, true);
+  exception when others then fails:=fails+1; r:=r||'FAIL L5 error: '||sqlerrm||' | '; end;
+
+  -- L6 B cannot delete A's legacy image
+  checks := checks + 1;
+  begin
+    perform set_config('request.jwt.claim.sub', ub::text, true);
+    perform set_config('request.jwt.claims', json_build_object('sub',ub,'role','authenticated')::text, true);
+    perform set_config('role', 'authenticated', true);
+    begin
+      delete from storage.objects where bucket_id='product-images' and name=la;
+      get diagnostics n = row_count;
+      perform set_config('role', admin_role, true);
+      if n=0 and exists (select 1 from storage.objects where name=la) then passes:=passes+1; r:=r||'PASS L6 B cannot delete A''s legacy image | ';
+      else fails:=fails+1; r:=r||'FAIL L6 B deleted A''s legacy image | '; end if;
+    exception when others then
+      if sqlerrm ilike '%direct deletion%' then inconcl:=inconcl+1; r:=r||'INCONCLUSIVE L6 Supabase guard blocked direct delete | ';
+      else fails:=fails+1; r:=r||'FAIL L6 error: '||sqlerrm||' | '; end if;
+    end;
+    perform set_config('role', admin_role, true);
+  exception when others then fails:=fails+1; r:=r||'FAIL L6 error: '||sqlerrm||' | '; end;
+
+  -- L7 A (owner) CAN delete her legacy image
+  checks := checks + 1;
+  begin
+    perform set_config('request.jwt.claim.sub', ua::text, true);
+    perform set_config('request.jwt.claims', json_build_object('sub',ua,'role','authenticated')::text, true);
+    perform set_config('role', 'authenticated', true);
+    begin
+      delete from storage.objects where bucket_id='product-images' and name=la;
+      get diagnostics n = row_count;
+      if n=1 then passes:=passes+1; r:=r||'PASS L7 owner can delete her legacy image | ';
+      else fails:=fails+1; r:=r||'FAIL L7 owner could not delete her legacy image | '; end if;
+    exception when others then
+      if sqlerrm ilike '%direct deletion%' then inconcl:=inconcl+1; r:=r||'INCONCLUSIVE L7 Supabase guard blocked direct delete | ';
+      else fails:=fails+1; r:=r||'FAIL L7 error: '||sqlerrm||' | '; end if;
+    end;
+    perform set_config('role', admin_role, true);
+  exception when others then fails:=fails+1; r:=r||'FAIL L7 error: '||sqlerrm||' | '; end;
+
+  -- K1 5 MB / image-only limits still set on the bucket (enforced by Supabase's file service)
+  checks := checks + 1;
+  if exists (select 1 from storage.buckets where id='product-images' and file_size_limit=5242880
+             and allowed_mime_types = array['image/png','image/jpeg','image/webp','image/gif']) then
+    passes:=passes+1; r:=r||'PASS K1 bucket still limited to 5 MB, PNG/JPG/WEBP/GIF | ';
+  else fails:=fails+1; r:=r||'FAIL K1 bucket size/type limits changed | '; end if;
+
   -- E1 real image records untouched; existing image still owner-manageable
   checks := checks + 1;
   begin
@@ -249,6 +370,6 @@ begin
     passes:=passes+1; r:=r||'PASS R3 no extra storage rules; order rules and bucket limits unchanged | ';
   else fails:=fails+1; r:=r||'FAIL R3 unexpected storage rules, or order rules / bucket limits changed | '; end if;
 
-  raise exception 'TEST RESULTS — % FAILED, % passed, % inconclusive, % of 18 checks run. Everything was undone. || %',
+  raise exception 'TEST RESULTS — % FAILED, % passed, % inconclusive, % of 26 checks run. Everything was undone. || %',
     fails, passes, inconcl, checks, r;
 end $$;

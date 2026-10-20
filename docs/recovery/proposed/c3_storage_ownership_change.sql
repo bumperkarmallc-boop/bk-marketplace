@@ -12,8 +12,8 @@
 --   * A user can REPLACE/RENAME or DELETE only files they own, and cannot
 --     move a file into someone else's folder.
 --   * The existing image (stored before folders, as "<user id>-<time>.png")
---     stays viewable and stays manageable by its owner, because replace and
---     delete are decided by recorded ownership (owner_id), which it has.
+--     stays viewable, and its recorded owner can replace it in place or
+--     delete it (v3.1 adjustment). Nobody else can.
 --   Later (Stage 4): uploads limited to APPROVED sellers once seller
 --   approval exists in the database.
 --
@@ -36,6 +36,11 @@ create policy "bk_product_images_upload_own" on storage.objects
     and split_part(name, '/', 1) = (select auth.uid())::text
   );
 
+-- Replace/rename: only your own files. The result must be EITHER
+--   (a) inside your own folder  <your id>/<file>            (all new images), OR
+--   (b) a top-level legacy name <your id>-<anything>        (the one older image
+--       stored before folders existed), so its owner can replace it in place.
+-- (b) never applies to uploads; new uploads must use your folder.
 create policy "bk_product_images_update_own" on storage.objects
   as permissive for update to authenticated
   using (
@@ -45,7 +50,13 @@ create policy "bk_product_images_update_own" on storage.objects
   with check (
     bucket_id = 'product-images'
     and owner_id = (select auth.uid())::text
-    and split_part(name, '/', 1) = (select auth.uid())::text
+    and (
+      split_part(name, '/', 1) = (select auth.uid())::text
+      or (
+        position('/' in name) = 0
+        and starts_with(name, (select auth.uid())::text || '-')
+      )
+    )
   );
 
 create policy "bk_product_images_delete_own" on storage.objects

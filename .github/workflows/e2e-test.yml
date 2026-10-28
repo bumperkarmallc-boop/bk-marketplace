@@ -72,7 +72,12 @@ jobs:
           fi
 
       - name: Build the site (pointed at the temporary Supabase)
-        run: npm run build
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee "$RUNNER_TEMP/build.log"
+          # Publish the page list (shows which pages are fixed at build time vs. live)
+          routes=$(sed -n '/Route (app)/,/^$/p' "$RUNNER_TEMP/build.log"; grep -E "^(○|ƒ|●)  *\(" "$RUNNER_TEMP/build.log")
+          echo "::notice title=BUILD PAGE LIST::$(printf '%s' "$routes" | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')"
 
       - name: Install the test browser
         run: |
@@ -92,11 +97,13 @@ jobs:
             if (!fs.existsSync("e2e-results.json")) { console.log("::error title=E2E RESULTS::No results file (tests did not run)"); process.exit(0); }
             const r = JSON.parse(fs.readFileSync("e2e-results.json", "utf8"));
             const strip = s => String(s || "").replace(/\u001b\[[0-9;]*m/g, "");
-            const lines = []; let pass = 0, fail = 0;
+            const lines = []; let pass = 0, fail = 0, notRun = 0;
             const walk = suite => {
               for (const spec of suite.specs || []) for (const t of spec.tests || []) {
                 const res = (t.results || [])[t.results.length - 1] || {};
-                const ok = res.status === "passed";
+                const st = res.status || "skipped";
+                if (st === "skipped") { notRun++; lines.push("NOT RUN " + spec.title); continue; }
+                const ok = st === "passed";
                 ok ? pass++ : fail++;
                 lines.push((ok ? "PASS " : "FAIL ") + spec.title);
                 if (!ok) for (const e of res.errors || []) lines.push("   " + strip(e.message).split("\n").slice(0, 12).join("\n   "));
@@ -105,7 +112,7 @@ jobs:
             };
             for (const s of r.suites || []) walk(s);
             for (const e of r.errors || []) { fail++; lines.push("SETUP ERROR " + strip(e.message).split("\n").slice(0, 12).join("\n   ")); }
-            const text = [`${pass} passed, ${fail} failed`, ...lines].join("\n").slice(0, 60000);
+            const text = [`${pass} passed, ${fail} failed, ${notRun} not run`, ...lines].join("\n").slice(0, 60000);
             const esc = text.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
             console.log(`::${fail ? "error" : "notice"} title=E2E RESULTS::${esc}`);
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, "```\n" + text + "\n```\n");

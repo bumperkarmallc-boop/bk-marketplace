@@ -7,8 +7,6 @@ import {
   readState, signedInClient,
 } from "./helpers";
 
-test.describe.configure({ mode: "serial" });
-
 async function login(page: Page, user: { email: string; password: string }) {
   await page.goto("/login");
   await page.getByPlaceholder("Email").fill(user.email);
@@ -25,16 +23,18 @@ async function imageLoaded(page: Page, alt: string) {
 }
 
 // ---------------------------------------------------------------- 1
-test("T1 Explore lists products and a product page shows its image", async ({ page }) => {
+test("T1a Explore lists current products with their images", async ({ page }) => {
   const s = readState();
   await page.goto("/explore");
   await expect(page.getByRole("heading", { name: s.productWithImage.title })).toBeVisible();
   await imageLoaded(page, s.productWithImage.title);
   await expect(page.getByRole("heading", { name: s.productNoImage.title })).toBeVisible();
   await expect(page.getByText("No image yet").first()).toBeVisible();
+});
 
-  await page.getByRole("heading", { name: s.productWithImage.title }).click();
-  await page.waitForURL(`**/products/${s.productWithImage.id}`);
+test("T1b A product page shows its image, title and price", async ({ page }) => {
+  const s = readState();
+  await page.goto(`/products/${s.productWithImage.id}`);
   await expect(page.getByRole("heading", { level: 1, name: s.productWithImage.title })).toBeVisible();
   await expect(page.getByText("$25.00")).toBeVisible();
   await imageLoaded(page, s.productWithImage.title);

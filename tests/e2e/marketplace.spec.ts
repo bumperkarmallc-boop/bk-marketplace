@@ -182,9 +182,13 @@ test("T7 Add a Product rejects cents, oversized images and non-images, and saves
     await page.locator('input[type="number"]').fill(price);
   };
 
+  // Cents: the browser's own whole-number check blocks the form before it is sent
   await fill("E2E Reject Cents", "19.99");
   await page.getByRole("button", { name: "Publish Product" }).click();
-  await expect(page.getByText(/whole dollars/i)).toBeVisible();
+  const priceInvalid = await page.locator('input[type="number"]')
+    .evaluate((el: HTMLInputElement) => !el.checkValidity());
+  expect(priceInvalid, "a cents price must be refused").toBe(true);
+  await expect(page).toHaveURL(/\/creator\/products\/new$/); // stayed on the form
 
   await fill("E2E Reject Big", "20");
   await page.locator('input[type="file"]').setInputFiles({ name: "big.png", mimeType: "image/png", buffer: oversizedPng() });

@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import {
+  PRODUCT_IMAGE_BUCKET,
+  checkProductImage,
+  productImagePath,
+} from "@/lib/productImages";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -10,9 +15,31 @@ export default function NewProductPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (saving) return; // ignore double clicks
+    setMessage(null);
+
+    // Prices are stored in whole dollars for now
+    const priceNumber = Number(price);
+    if (!Number.isInteger(priceNumber) || priceNumber < 0) {
+      setMessage("Please enter the price in whole dollars (for example 25).");
+      return;
+    }
+
+    if (imageFile) {
+      const problem = checkProductImage(imageFile);
+      if (problem) {
+        setMessage(problem);
+        return;
+      }
+    }
+
+    setSaving(true);
 
     // Get current user
     const {
@@ -21,26 +48,57 @@ export default function NewProductPage() {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      console.error("No authenticated user");
+      setMessage("Please log in first.");
+      setSaving(false);
       return;
     }
-console.log("User ID:", user.id);
 
+    // 1) Upload the image (optional) into this user's own folder
+    let imageUrl: string | null = null;
+    let imagePath: string | null = null;
+
+    if (imageFile) {
+      imagePath = productImagePath(user.id, imageFile);
+      const { error: uploadError } = await supabase.storage
+        .from(PRODUCT_IMAGE_BUCKET)
+        .upload(imagePath, imageFile, {
+          contentType: imageFile.type,
+          upsert: false, // never overwrite an existing file
+        });
+
+      if (uploadError) {
+        setMessage("Image upload failed: " + uploadError.message);
+        setSaving(false);
+        return;
+      }
+
+      imageUrl = supabase.storage
+        .from(PRODUCT_IMAGE_BUCKET)
+        .getPublicUrl(imagePath).data.publicUrl;
+    }
+
+    // 2) Create the product
     const { data, error } = await supabase
       .from("products")
       .insert([
         {
           title,
           description,
-          price: Number(price),
+          price: priceNumber,
+          image: imageUrl,
           user_id: user.id,
         },
       ])
-      .select()
+      .select("id")
       .single();
 
     if (error) {
-      console.error(error);
+      // Don't leave an unused image behind if the product wasn't saved
+      if (imagePath) {
+        await supabase.storage.from(PRODUCT_IMAGE_BUCKET).remove([imagePath]);
+      }
+      setMessage("Could not save the product: " + error.message);
+      setSaving(false);
       return;
     }
 
@@ -119,7 +177,7 @@ console.log("User ID:", user.id);
             onChange={(e) => setPrice(e.target.value)}
             required
             min="0"
-            step="0.01"
+            step="1"
             style={{
               width: "100%",
               padding: "0.75rem",
@@ -132,8 +190,26 @@ console.log("User ID:", user.id);
           />
         </div>
 
+        {/* IMAGE (optional) */}
+        <div style={{ marginBottom: "2rem" }}>
+          <label style={{ display: "block", marginBottom: "0.5rem" }}>
+            Product Image (optional — PNG, JPG, WEBP or GIF, up to 5 MB)
+          </label>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+            style={{ color: "#fff" }}
+          />
+        </div>
+
+        {message && (
+          <p style={{ color: "#f87171", marginBottom: "1rem" }}>{message}</p>
+        )}
+
         <button
           type="submit"
+          disabled={saving}
           style={{
             padding: "0.9rem 1.5rem",
             border: "none",
@@ -141,10 +217,10 @@ console.log("User ID:", user.id);
             background: "#fff",
             color: "#000",
             fontWeight: "bold",
-            cursor: "pointer",
+            cursor: saving ? "not-allowed" : "pointer",
           }}
         >
-          Publish Product
+          {saving ? "Saving…" : "Publish Product"}
         </button>
       </form>
     </div>

@@ -41,3 +41,11 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# automated test run output (temporary)
+/tests/e2e/.state.json
+/e2e-results.json
+/test-results
+/playwright-report
+/supabase/.temp
+/supabase/.branches

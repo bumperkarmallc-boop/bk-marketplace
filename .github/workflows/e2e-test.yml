@@ -1,0 +1,117 @@
+# Automated marketplace tests for recovery/* work branches.
+#
+# SAFETY
+# * Starts a brand-new, empty, private Supabase INSIDE this build server
+#   (http://127.0.0.1:54321) and throws it away at the end.
+# * Never connects to the live Supabase project: no live URL or key is used
+#   or stored anywhere, and a guard step stops the run if anything points
+#   elsewhere.
+# * All accounts, products, images and orders are fake and temporary.
+# * Never deploys and never runs for main.
+name: Marketplace tests (isolated)
+
+on:
+  push:
+    branches:
+      - "recovery/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install site dependencies
+        run: npm ci
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start temporary local test Supabase
+        run: supabase start -x realtime,imgproxy,studio,edge-runtime,logflare,vector,supavisor,postgres-meta,mailpit
+
+      - name: Point the site and tests at the temporary Supabase only
+        run: |
+          supabase status -o env > "$RUNNER_TEMP/sb.env"
+          set -a; . "$RUNNER_TEMP/sb.env"; set +a
+          # keys of the throwaway local stack; masked anyway
+          echo "::add-mask::$ANON_KEY"
+          echo "::add-mask::$SERVICE_ROLE_KEY"
+          case "$API_URL" in
+            http://127.0.0.1:*|http://localhost:*) ;;
+            *) echo "::error::Refusing to run: Supabase URL is not the local test stack"; exit 1 ;;
+          esac
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "TEST_SUPABASE_SERVICE_KEY=$SERVICE_ROLE_KEY"
+            echo "TEST_DB_URL=$DB_URL"
+          } >> "$GITHUB_ENV"
+
+      - name: Check the test database structure matches the expected copy
+        run: |
+          psql "$TEST_DB_URL" -At -f tests/e2e/schema-check.sql > "$RUNNER_TEMP/actual-schema.txt"
+          if diff -u tests/e2e/expected-schema.txt "$RUNNER_TEMP/actual-schema.txt" > "$RUNNER_TEMP/schema.diff"; then
+            echo "::notice title=SCHEMA CHECK::Test database structure matches expected-schema.txt ($(wc -l < "$RUNNER_TEMP/actual-schema.txt") items)"
+          else
+            echo "::error title=SCHEMA MISMATCH::$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' "$RUNNER_TEMP/schema.diff")"
+            exit 1
+          fi
+
+      - name: Build the site (pointed at the temporary Supabase)
+        run: npm run build
+
+      - name: Install the test browser
+        run: |
+          npm install --no-save @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run marketplace tests
+        id: tests
+        continue-on-error: true
+        run: npx playwright test
+
+      - name: Publish test results
+        if: always()
+        run: |
+          node -e '
+            const fs = require("fs");
+            if (!fs.existsSync("e2e-results.json")) { console.log("::error title=E2E RESULTS::No results file (tests did not run)"); process.exit(0); }
+            const r = JSON.parse(fs.readFileSync("e2e-results.json", "utf8"));
+            const strip = s => String(s || "").replace(/\u001b\[[0-9;]*m/g, "");
+            const lines = []; let pass = 0, fail = 0;
+            const walk = suite => {
+              for (const spec of suite.specs || []) for (const t of spec.tests || []) {
+                const res = (t.results || [])[t.results.length - 1] || {};
+                const ok = res.status === "passed";
+                ok ? pass++ : fail++;
+                lines.push((ok ? "PASS " : "FAIL ") + spec.title);
+                if (!ok) for (const e of res.errors || []) lines.push("   " + strip(e.message).split("\n").slice(0, 12).join("\n   "));
+              }
+              for (const s of suite.suites || []) walk(s);
+            };
+            for (const s of r.suites || []) walk(s);
+            for (const e of r.errors || []) { fail++; lines.push("SETUP ERROR " + strip(e.message).split("\n").slice(0, 12).join("\n   ")); }
+            const text = [`${pass} passed, ${fail} failed`, ...lines].join("\n").slice(0, 60000);
+            const esc = text.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+            console.log(`::${fail ? "error" : "notice"} title=E2E RESULTS::${esc}`);
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, "```\n" + text + "\n```\n");
+          '
+          if [ "${{ steps.tests.outcome }}" != "success" ]; then exit 1; fi
+
+      - name: Stop temporary Supabase
+        if: always()
+        run: supabase stop --no-backup

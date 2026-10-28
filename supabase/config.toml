@@ -1,0 +1,28 @@
+# Settings for the TEMPORARY local test Supabase only (started by the
+# automated test workflow on GitHub's build server and thrown away after).
+# This file is not used by, and does not change, the live Supabase project.
+project_id = "bk-marketplace-test"
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+major_version = 17
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+# Test accounts can log in immediately (no confirmation e-mails in tests).
+enable_confirmations = false
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[studio]
+enabled = false

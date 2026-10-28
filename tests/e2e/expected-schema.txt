@@ -1,0 +1,20 @@
+bucket|product-images|public=true|limit=5242880|types=image/gif,image/jpeg,image/png,image/webp
+constraint|products|products_price_nonnegative|CHECK ((price >= 0))
+function|place_order(jsonb)|security_definer=true|anon=false|authenticated=true
+policy|public.order_items|Allow insert for authenticated users|INSERT|{public}
+policy|public.order_items|read_order_items|SELECT|{authenticated}
+policy|public.orders|Enable insert for authenticated users only|INSERT|{authenticated}
+policy|public.orders|Users can view their own orders|SELECT|{public}
+policy|public.products|Authenticated users can delete their own products|DELETE|{authenticated}
+policy|public.products|Authenticated users can insert their own products|INSERT|{authenticated}
+policy|public.products|Authenticated users can read their own products|SELECT|{authenticated}
+policy|public.products|Authenticated users can update their own products|UPDATE|{authenticated}
+policy|public.products|Public can read products|SELECT|{anon}
+policy|public.products|read_products|SELECT|{public}
+policy|storage.objects|bk_product_images_delete_own|DELETE|{authenticated}
+policy|storage.objects|bk_product_images_public_read|SELECT|{public}
+policy|storage.objects|bk_product_images_update_own|UPDATE|{authenticated}
+policy|storage.objects|bk_product_images_upload_own|INSERT|{authenticated}
+rls|order_items|true
+rls|orders|true
+rls|products|true

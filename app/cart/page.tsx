@@ -1,17 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { getCart, saveCart, type CartItem } from "@/lib/cartStore"
+import { saveCart, useCart, type CartItem } from "@/lib/cartStore"
 
 export default function CartPage() {
-  const [cart, setCart] = useState<CartItem[]>([])
-
-  useEffect(() => {
-    setCart(getCart())
-  }, [])
+  const cart = useCart()
 
   const updateCart = (newCart: CartItem[]) => {
-    setCart(newCart)
     saveCart(newCart)
   }
 

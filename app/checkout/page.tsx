@@ -1,23 +1,21 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getCart, type CartItem } from "@/lib/cartStore"
+import { clearCart, getCart, useCart } from "@/lib/cartStore"
 import { supabaseBrowser } from "@/lib/supabase-browser"
 
 export default function CheckoutPage() {
 
-  const [cart, setCart] = useState<CartItem[]>([])
+  const cart = useCart()
 
-useEffect(() => {
-  const items = getCart()
-
-  if (items.length === 0) {
-    window.location.href = "/cart"
-    return
-  }
-
-  setCart(items)
-}, [])
+  // Nothing to check out: go back to the cart page.
+  // (Reads the saved cart directly, so it is not fooled by the brief empty
+  // first render before the browser's saved cart is loaded.)
+  useEffect(() => {
+    if (getCart().length === 0) {
+      window.location.href = "/cart"
+    }
+  }, [])
 const subtotal = cart.reduce((sum, item) => {
   return sum + Number(item.price) * item.quantity
 }, 0)
@@ -52,8 +50,7 @@ const subtotal = cart.reduce((sum, item) => {
       return
     }
 
-    localStorage.removeItem("cart")
-    setCart([])
+    clearCart()
     window.location.href = "/orders"
   }
 

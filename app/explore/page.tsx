@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import ProductImage from "@/components/ProductImage";
 
 export default async function ExplorePage() {
+  // Only public listing fields (the seller's private account ID is not needed here)
   const { data: products, error } = await supabase
     .from("products")
-    .select("*")
+    .select("id, title, description, price, image, created_at")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -55,10 +57,16 @@ export default async function ExplorePage() {
         borderRadius: "10px",
       }}
     >
-      <h2>{product.title}</h2>
+      <ProductImage src={product.image} alt={product.title} height={220} />
+
+      <h2 style={{ marginTop: "1rem" }}>{product.title}</h2>
 
       <p style={{ fontWeight: "bold", marginTop: "0.5rem" }}>
-        ${product.price.toFixed(2)}
+        ${Number(product.price).toFixed(2)}
+      </p>
+
+      <p style={{ marginTop: "0.25rem", fontSize: "0.85rem", opacity: 0.7 }}>
+        Sold by an independent creator
       </p>
 
       <p style={{ marginTop: "0.75rem", opacity: 0.85 }}>

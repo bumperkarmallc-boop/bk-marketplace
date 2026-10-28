@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
 import AddToCartButton from "../../../components/AddToCartButton";
+import ProductImage from "../../../components/ProductImage";
 export default async function ProductPage({
   params,
 }: {
@@ -25,10 +26,16 @@ export default async function ProductPage({
 
   return (
     <div style={{ padding: "2rem", maxWidth: "800px" }}>
-      <h1>{product.title}</h1>
+      <ProductImage src={product.image} alt={product.title} height={420} />
+
+      <h1 style={{ marginTop: "1.5rem" }}>{product.title}</h1>
 
       <p style={{ fontSize: "1.2rem", marginTop: "1rem" }}>
-        ${product.price.toFixed(2)}
+        ${Number(product.price).toFixed(2)}
+      </p>
+
+      <p style={{ marginTop: "0.25rem", fontSize: "0.9rem", opacity: 0.7 }}>
+        Sold by an independent creator
       </p>
 
       <p style={{ marginTop: "1.5rem", opacity: 0.8 }}>

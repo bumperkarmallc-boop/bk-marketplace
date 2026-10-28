@@ -2,6 +2,9 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import ProductImage from "@/components/ProductImage";
 
+// Always load current products on each visit (not a snapshot from build time)
+export const dynamic = "force-dynamic";
+
 export default async function ExplorePage() {
   // Only public listing fields (the seller's private account ID is not needed here)
   const { data: products, error } = await supabase

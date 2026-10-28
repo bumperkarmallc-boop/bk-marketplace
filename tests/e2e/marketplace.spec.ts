@@ -32,6 +32,30 @@ test("T1a Explore lists current products with their images", async ({ page }) =>
   await expect(page.getByText("No image yet").first()).toBeVisible();
 });
 
+test("T1c All Products lists current products, including one added just now", async ({ page }) => {
+  const s = readState();
+  // Added AFTER the site was built, so it can only appear if the page is live
+  const title = "E2E Fresh Listing " + Date.now();
+  const { error } = await adminClient().from("products")
+    .insert({ title, description: "Added during the test (fake)", price: 9, user_id: s.sellerAId });
+  expect(error).toBeNull();
+
+  await page.goto("/products");
+  await expect(page.getByRole("heading", { name: title })).toBeVisible();
+  await expect(page.getByRole("heading", { name: s.productWithImage.title })).toBeVisible();
+
+  await page.goto("/explore");
+  await expect(page.getByRole("heading", { name: title })).toBeVisible();
+});
+
+test("T1d Home links to Explore, which shows current products", async ({ page }) => {
+  const s = readState();
+  await page.goto("/");
+  await page.getByRole("link", { name: "Go to Explore →" }).click();
+  await page.waitForURL("**/explore");
+  await expect(page.getByRole("heading", { name: s.productWithImage.title })).toBeVisible();
+});
+
 test("T1b A product page shows its image, title and price", async ({ page }) => {
   const s = readState();
   await page.goto(`/products/${s.productWithImage.id}`);
